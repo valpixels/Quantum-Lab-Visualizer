@@ -1,179 +1,230 @@
 import { useState } from "react";
 import { useApp } from "@/context/AppContext";
+import { t } from "@/lib/i18n";
+import Dashboard from "@/pages/Dashboard";
 import LessonsPage from "@/pages/LessonsPage";
 import BlochPage from "@/pages/BlochPage";
 import CircuitPage from "@/pages/CircuitPage";
+import SurveyPage from "@/pages/SurveyPage";
+import { LESSONS, TOTAL_DAYS } from "@/lib/lessons";
 
-type Tab = "lessons" | "bloch" | "circuit";
+type View = "home" | "lessons" | "bloch" | "circuit" | "survey";
 
 export default function AppLayout() {
-  const { role, clientName, synced, unsync, resync, clients, teacherState, updateTeacherState, connected } =
-    useApp();
+  const {
+    role, clientName, synced, unsync, resync, clients,
+    teacherState, updateTeacherState, connected, language, setLanguage,
+    selfTeachingMode, programStartDate, currentDay,
+  } = useApp();
 
   const isTeacher = role === "teacher";
-  const [localTab, setLocalTab] = useState<Tab>("lessons");
+  const isRTL = language === "ar";
+  const [localView, setLocalView] = useState<View>("home");
+  const [localLessonId, setLocalLessonId] = useState<string | undefined>();
+  const [surveyOpen, setSurveyOpen] = useState(false);
 
-  const displayTab: Tab = isTeacher
-    ? teacherState.activeView
-    : synced
-    ? teacherState.activeView
-    : localTab;
-
-  const handleTabChange = (tab: Tab) => {
+  const displayView: View = (() => {
     if (isTeacher) {
-      updateTeacherState({ activeView: tab });
-    } else if (!synced) {
-      setLocalTab(tab);
+      if (teacherState.activeView === "bloch") return "bloch";
+      if (teacherState.activeView === "circuit") return "circuit";
+      return localView;
+    }
+    if (synced) {
+      if (teacherState.activeView === "bloch") return "bloch";
+      if (teacherState.activeView === "circuit") return "circuit";
+      if (teacherState.currentLessonId) return "lessons";
+      return "home";
+    }
+    return localView;
+  })();
+
+  const isFinalDay = selfTeachingMode && programStartDate && currentDay >= TOTAL_DAYS;
+
+  const handleNavigate = (view: View | "lessons" | "bloch" | "circuit", lessonId?: string) => {
+    const v = view as View;
+    if (isTeacher) {
+      if (v === "bloch") updateTeacherState({ activeView: "bloch" });
+      else if (v === "circuit") updateTeacherState({ activeView: "circuit" });
+      else updateTeacherState({ activeView: "lessons" });
+    }
+    setLocalView(v === "home" ? "home" : v);
+    if (lessonId) {
+      setLocalLessonId(lessonId);
+      setLocalView("lessons");
     }
   };
 
   const teacherOnline = clients.some((c) => c.role === "teacher");
   const studentCount = clients.filter((c) => c.role === "student").length;
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
-    {
-      id: "lessons",
-      label: "Lessons",
-      icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <path d="M12 14l9-5-9-5-9 5 9 5z" />
-          <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-        </svg>
-      ),
-    },
-    {
-      id: "bloch",
-      label: "Bloch Sphere",
-      icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <circle cx="12" cy="12" r="9" />
-          <ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(45 12 12)" />
-          <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-        </svg>
-      ),
-    },
-    {
-      id: "circuit",
-      label: "Circuit",
-      icon: (
-        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
-          <rect x="3" y="9" width="4" height="6" rx="1" />
-          <rect x="10" y="9" width="4" height="6" rx="1" />
-          <rect x="17" y="9" width="4" height="6" rx="1" />
-          <line x1="7" y1="12" x2="10" y2="12" />
-          <line x1="14" y1="12" x2="17" y2="12" />
-          <line x1="1" y1="12" x2="3" y2="12" />
-          <line x1="21" y1="12" x2="23" y2="12" />
-        </svg>
-      ),
-    },
+  const navTabs: { id: View; label: string }[] = [
+    { id: "home", label: language === "ar" ? "الرئيسية" : "Home" },
+    { id: "lessons", label: t(language, "lessons") },
+    { id: "bloch", label: t(language, "blochSphere") },
+    { id: "circuit", label: t(language, "circuitLab") },
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-gray-950 text-white overflow-hidden">
-      <header className="flex items-center justify-between px-4 py-3 border-b border-gray-800 bg-gray-900/80 backdrop-blur shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 flex items-center justify-center">
-            <svg className="w-4 h-4 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="9" />
-              <ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(45 12 12)" />
-              <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-            </svg>
-          </div>
-          <span className="font-semibold text-white text-sm">Quantum Lab</span>
-          <div className={`hidden sm:flex items-center gap-1 text-xs ${connected ? "text-emerald-400" : "text-amber-400"}`}>
-            <div className={`w-1.5 h-1.5 rounded-full ${connected ? "bg-emerald-400" : "bg-amber-400 animate-pulse"}`} />
-            {connected ? "Live" : "Reconnecting"}
-          </div>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: "hsl(350 100% 97%)" }} dir={isRTL ? "rtl" : "ltr"}>
+      {/* Top nav — matching the design slide */}
+      <header
+        className="flex items-center justify-between px-4 py-2.5 shrink-0"
+        style={{ background: "hsl(350 100% 93%)", borderBottom: "2px solid hsl(340 40% 88%)" }}
+      >
+        <div className="flex items-center gap-2">
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" style={{ color: "#1a0f6e" }}>
+            <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.7" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.4" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.4" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.7" />
+          </svg>
         </div>
 
+        {/* Tab nav */}
         <nav className="flex items-center gap-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              disabled={!isTeacher && synced}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-                displayTab === tab.id
-                  ? "bg-indigo-600/30 text-indigo-300 border border-indigo-500/40"
-                  : "text-gray-400 hover:text-gray-200 hover:bg-gray-800 disabled:opacity-50 disabled:cursor-default"
-              }`}
-            >
-              {tab.icon}
-              <span className="hidden sm:block">{tab.label}</span>
-            </button>
-          ))}
+          {navTabs.map((tab) => {
+            const isActive = displayView === tab.id || (displayView === "lessons" && tab.id === "lessons");
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleNavigate(tab.id)}
+                disabled={!isTeacher && synced && (tab.id === "bloch" || tab.id === "circuit" || tab.id === "lessons")}
+                className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all disabled:opacity-40"
+                style={{
+                  background: isActive ? "#1a0f6e" : "transparent",
+                  color: isActive ? "white" : "#1a0f6e",
+                }}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
         </nav>
 
         <div className="flex items-center gap-2">
-          <div className="hidden md:flex items-center gap-2 text-xs text-gray-500">
+          {/* Session info */}
+          <div className="hidden md:flex items-center gap-2 text-xs" style={{ color: "#7c6fcd" }}>
             {teacherOnline ? (
-              <span className="flex items-center gap-1 text-violet-400">
-                <div className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-                Teacher online
+              <span className="flex items-center gap-1 font-bold" style={{ color: "#6b3abf" }}>
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#6b3abf" }} />
+                {t(language, "teacherOnline")}
               </span>
             ) : (
-              <span>No teacher</span>
+              <span>{t(language, "noTeacher")}</span>
             )}
             <span>·</span>
-            <span>{studentCount} student{studentCount !== 1 ? "s" : ""}</span>
+            <span>{studentCount} {t(language, studentCount === 1 ? "student_one" : "students")}</span>
           </div>
 
+          {/* Sync toggle */}
           {isTeacher ? (
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-violet-600/20 border border-violet-500/30 text-xs text-violet-300">
-              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M12 14l9-5-9-5-9 5 9 5z" />
+            <div
+              className="flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-bold"
+              style={{ background: "#ddd4f8", color: "#1a0f6e" }}
+            >
+              <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
               </svg>
-              Teacher
+              {t(language, "teacher")}
             </div>
           ) : synced ? (
             <button
               onClick={unsync}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-cyan-600/20 border border-cyan-500/30 text-xs text-cyan-300 hover:bg-cyan-600/30 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-bold transition-all"
+              style={{ background: "#a8d8f5", color: "#1a0f6e" }}
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-              Synced &middot; Unsync
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+              {t(language, "synced")} · {t(language, "unsync")}
             </button>
           ) : (
             <button
               onClick={resync}
-              className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-gray-700/60 border border-gray-600/50 text-xs text-gray-300 hover:bg-gray-700 transition-colors"
+              className="flex items-center gap-1 px-2 py-1 rounded-xl text-xs font-bold transition-all"
+              style={{ background: "#f5f0ff", color: "#1a0f6e", border: "1px solid #c5b8f5" }}
             >
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-500" />
-              Unsynced &middot; Resync
+              <div className="w-1.5 h-1.5 rounded-full" style={{ background: "#c5b8f5" }} />
+              {t(language, "unsynced")} · {t(language, "resync")}
             </button>
           )}
 
-          <div className="text-xs text-gray-500 hidden sm:block">
+          {/* Language toggle */}
+          <button
+            onClick={() => setLanguage(language === "en" ? "ar" : "en")}
+            className="px-2 py-1 rounded-xl text-xs font-bold"
+            style={{ background: "#c5b8f5", color: "#1a0f6e" }}
+          >
+            {t(language, "language")}
+          </button>
+
+          <div className="text-xs font-medium hidden sm:block" style={{ color: "#7c6fcd" }}>
             {clientName}
           </div>
+
+          {/* Connection */}
+          <div className={`w-2 h-2 rounded-full ${connected ? "bg-green-400" : "bg-amber-400 animate-pulse"}`} />
         </div>
       </header>
 
+      {/* Sync banners */}
       {!isTeacher && synced && (
-        <div className="px-4 py-2 bg-cyan-950/40 border-b border-cyan-900/50 text-xs text-cyan-300 flex items-center gap-2 shrink-0">
-          <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-          Synced to teacher — navigation and visualizations are controlled by your teacher.
-          <button onClick={unsync} className="ml-auto underline hover:no-underline">
-            Unsync to explore independently
+        <div
+          className="px-4 py-1.5 flex items-center gap-2 text-xs font-medium shrink-0"
+          style={{ background: "#e8f4ff", borderBottom: "1px solid #c8e8f8", color: "#1a4a6e" }}
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+          {t(language, "syncedBanner")}
+          <button onClick={unsync} className="ml-auto underline" style={{ color: "#1a4a6e" }}>
+            {t(language, "unsyncToExplore")}
           </button>
         </div>
       )}
-
       {!isTeacher && !synced && (
-        <div className="px-4 py-2 bg-amber-950/30 border-b border-amber-900/40 text-xs text-amber-400 flex items-center gap-2 shrink-0">
+        <div
+          className="px-4 py-1.5 flex items-center gap-2 text-xs font-medium shrink-0"
+          style={{ background: "#fff8e8", borderBottom: "1px solid #f5e4b8", color: "#6e4a0f" }}
+        >
           <div className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-          Exploring independently — your changes are not shared.
-          <button onClick={resync} className="ml-auto underline hover:no-underline">
-            Resync to teacher
+          {t(language, "unsyncedBanner")}
+          <button onClick={resync} className="ml-auto underline" style={{ color: "#6e4a0f" }}>
+            {t(language, "resyncToTeacher")}
           </button>
         </div>
       )}
 
-      <main className="flex-1 overflow-auto">
-        {displayTab === "lessons" && <LessonsPage />}
-        {displayTab === "bloch" && <BlochPage />}
-        {displayTab === "circuit" && <CircuitPage />}
+      {/* Final day survey prompt */}
+      {isFinalDay && !surveyOpen && (
+        <div
+          className="px-4 py-2 flex items-center gap-3 text-xs font-medium shrink-0"
+          style={{ background: "#ddd4f8", borderBottom: "2px solid #c5b8f5" }}
+        >
+          <span style={{ color: "#1a0f6e" }}>
+            {language === "en" ? "🎓 You've completed the full program! Please share your feedback." : "🎓 أكملت البرنامج كاملاً! يرجى مشاركة ملاحظاتك."}
+          </span>
+          <button
+            onClick={() => setSurveyOpen(true)}
+            className="ml-auto px-3 py-1 rounded-lg font-bold"
+            style={{ background: "#1a0f6e", color: "white" }}
+          >
+            {t(language, "survey")} →
+          </button>
+        </div>
+      )}
+
+      {/* Main view */}
+      <main className="flex-1 overflow-auto min-h-0">
+        {surveyOpen ? (
+          <SurveyPage onClose={() => setSurveyOpen(false)} />
+        ) : displayView === "home" ? (
+          <Dashboard onNavigate={handleNavigate} />
+        ) : displayView === "lessons" ? (
+          <LessonsPage initialLessonId={localLessonId} onNavigate={handleNavigate} />
+        ) : displayView === "bloch" ? (
+          <BlochPage />
+        ) : displayView === "circuit" ? (
+          <CircuitPage />
+        ) : (
+          <Dashboard onNavigate={handleNavigate} />
+        )}
       </main>
     </div>
   );

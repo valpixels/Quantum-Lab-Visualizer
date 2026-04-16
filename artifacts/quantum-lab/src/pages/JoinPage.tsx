@@ -1,104 +1,173 @@
 import { useState } from "react";
 import { useApp } from "@/context/AppContext";
+import { t } from "@/lib/i18n";
 
 export default function JoinPage() {
-  const { join, joinError, connected } = useApp();
+  const { join, joinError, connected, language, setLanguage } = useApp();
   const [name, setName] = useState("");
   const [selectedRole, setSelectedRole] = useState<"teacher" | "student" | null>(null);
+  const [joining, setJoining] = useState(false);
+
+  const isRTL = language === "ar";
 
   function handleJoin() {
-    if (!selectedRole || !name.trim()) return;
+    if (!selectedRole || !name.trim() || !connected) return;
+    setJoining(true);
     join(selectedRole, name.trim());
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-950 via-indigo-950 to-gray-950">
-      <div className="w-full max-w-md px-6">
-        {/* Logo / Title */}
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-indigo-500/20 border border-indigo-500/30 mb-4">
-            <svg className="w-8 h-8 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-              <circle cx="12" cy="12" r="9" />
-              <ellipse cx="12" cy="12" rx="9" ry="4" transform="rotate(45 12 12)" />
-              <circle cx="12" cy="12" r="1.5" fill="currentColor" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Quantum Lab</h1>
-          <p className="text-indigo-300/70 mt-2 text-sm">Interactive Quantum Computing Classroom</p>
+    <div
+      dir={isRTL ? "rtl" : "ltr"}
+      className="min-h-screen flex flex-col"
+      style={{ background: "hsl(350 100% 97%)" }}
+    >
+      {/* Top nav */}
+      <nav
+        className="flex items-center justify-between px-6 py-3"
+        style={{ background: "hsl(350 100% 93%)", borderBottom: "1px solid hsl(340 40% 88%)" }}
+      >
+        <div className="flex items-center gap-2">
+          <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" style={{ color: "#1a0f6e" }}>
+            <rect x="3" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.7" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.4" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.4" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" fill="currentColor" opacity="0.7" />
+          </svg>
         </div>
+        <div className="flex items-center gap-6">
+          <a href="#" className="text-sm font-semibold" style={{ color: "#1a0f6e" }}>
+            {t(language, "help")}
+          </a>
+          <a href="#" className="text-sm font-semibold" style={{ color: "#1a0f6e" }}>
+            {t(language, "qubit")}
+          </a>
+          <a href="#" className="text-sm font-semibold" style={{ color: "#1a0f6e" }}>
+            {t(language, "grid")}
+          </a>
+          <button
+            onClick={() => setLanguage(language === "en" ? "ar" : "en")}
+            className="text-sm font-bold px-3 py-1 rounded-full transition-all"
+            style={{
+              background: "#c5b8f5",
+              color: "#1a0f6e",
+              border: "2px solid #a89ae8",
+            }}
+          >
+            {t(language, "language")}
+          </button>
+        </div>
+      </nav>
 
-        <div className="bg-gray-900/80 backdrop-blur border border-gray-800 rounded-2xl p-6 shadow-2xl">
-          {/* Connection status */}
-          <div className="flex items-center gap-2 mb-6">
-            <div className={`w-2 h-2 rounded-full ${connected ? "bg-emerald-400" : "bg-amber-400 animate-pulse"}`} />
-            <span className="text-xs text-gray-400">{connected ? "Connected to server" : "Connecting..."}</span>
+      {/* Main content */}
+      <div className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-sm text-center">
+          {/* Wavy decorative blobs */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div
+              className="absolute -top-20 -left-20 w-72 h-72 rounded-full opacity-20"
+              style={{ background: "#c5b8f5", filter: "blur(60px)" }}
+            />
+            <div
+              className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full opacity-20"
+              style={{ background: "#a8d8f5", filter: "blur(60px)" }}
+            />
           </div>
 
-          <label className="block text-sm font-medium text-gray-300 mb-1.5">Your name</label>
+          {/* Logo */}
+          <div className="relative flex justify-center mb-3">
+            <div
+              className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md"
+              style={{ background: "#c5b8f5" }}
+            >
+              <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="#1a0f6e" strokeWidth="1.5" />
+                <ellipse cx="12" cy="12" rx="9" ry="3.5" stroke="#1a0f6e" strokeWidth="1.2" opacity="0.6" transform="rotate(40 12 12)" />
+                <circle cx="12" cy="12" r="2" fill="#1a0f6e" />
+              </svg>
+            </div>
+          </div>
+
+          <h1 className="text-4xl font-black mb-1" style={{ color: "#1a0f6e" }}>
+            {language === "en" ? (
+              <><span>Quantum</span> <span style={{ color: "#7c6fcd" }}>Lab</span></>
+            ) : (
+              <><span style={{ color: "#7c6fcd" }}>مختبر</span> <span>الكم</span></>
+            )}
+          </h1>
+          <p className="text-sm mb-6" style={{ color: "#7c6fcd" }}>
+            {t(language, "appSubtitle")}
+          </p>
+
+          {/* Connection status */}
+          <div className="flex items-center justify-center gap-1.5 mb-5 text-xs" style={{ color: connected ? "#22c55e" : "#f59e0b" }}>
+            <div className={`w-2 h-2 rounded-full ${connected ? "bg-green-400" : "bg-amber-400 animate-pulse"}`} />
+            {connected ? t(language, "connectedToServer") : t(language, "connecting")}
+          </div>
+
+          {/* Name input */}
           <input
             type="text"
-            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2.5 text-white placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 mb-5"
-            placeholder="Enter your name..."
+            placeholder={t(language, "namePlaceholder")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+            dir={isRTL ? "rtl" : "ltr"}
+            className="w-full px-4 py-3 rounded-2xl text-sm font-medium mb-5 outline-none transition-all"
+            style={{
+              background: "#fce4e4",
+              border: "2px solid #f0b8b8",
+              color: "#1a0f6e",
+            }}
           />
 
-          <p className="text-sm font-medium text-gray-300 mb-3">Join as...</p>
+          {/* Role selection */}
+          <p className="text-sm font-bold mb-3" style={{ color: "#1a0f6e" }}>
+            {t(language, "joinAs")}
+          </p>
           <div className="grid grid-cols-2 gap-3 mb-5">
             <button
-              onClick={() => setSelectedRole("teacher")}
-              className={`relative p-4 rounded-xl border text-left transition-all ${
-                selectedRole === "teacher"
-                  ? "border-violet-500 bg-violet-500/15"
-                  : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
-              }`}
-            >
-              <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center mb-2">
-                <svg className="w-4 h-4 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 14l9-5-9-5-9 5 9 5z" />
-                  <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
-                </svg>
-              </div>
-              <div className="text-sm font-semibold text-white">Teacher</div>
-              <div className="text-xs text-gray-400 mt-0.5">Control the session</div>
-              {selectedRole === "teacher" && (
-                <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-violet-500 flex items-center justify-center">
-                  <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 10 10" fill="currentColor">
-                    <path d="M8.5 2.5L4 7 1.5 4.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                  </svg>
-                </div>
-              )}
-            </button>
-
-            <button
               onClick={() => setSelectedRole("student")}
-              className={`relative p-4 rounded-xl border text-left transition-all ${
-                selectedRole === "student"
-                  ? "border-cyan-500 bg-cyan-500/15"
-                  : "border-gray-700 bg-gray-800/50 hover:border-gray-600"
-              }`}
+              className="p-4 rounded-2xl transition-all text-center"
+              style={{
+                background: selectedRole === "student" ? "#a8d8f5" : "#c8eaf8",
+                border: `3px solid ${selectedRole === "student" ? "#7ac0e8" : "#a8d8f5"}`,
+                color: "#1a0f6e",
+              }}
             >
-              <div className="w-8 h-8 rounded-lg bg-cyan-500/20 flex items-center justify-center mb-2">
-                <svg className="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <div className="text-lg font-bold">{t(language, "student")}</div>
+              <div className="text-xs mt-0.5 opacity-70">{t(language, "studentDesc")}</div>
+              <div className="mt-2 flex justify-center">
+                <svg className="w-6 h-6 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="12" cy="7" r="4" />
                   <path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2" />
                 </svg>
               </div>
-              <div className="text-sm font-semibold text-white">Student</div>
-              <div className="text-xs text-gray-400 mt-0.5">Follow along</div>
-              {selectedRole === "student" && (
-                <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-cyan-500 flex items-center justify-center">
-                  <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 10 10" fill="currentColor">
-                    <path d="M8.5 2.5L4 7 1.5 4.5" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-                  </svg>
-                </div>
-              )}
+            </button>
+
+            <button
+              onClick={() => setSelectedRole("teacher")}
+              className="p-4 rounded-2xl transition-all text-center"
+              style={{
+                background: selectedRole === "teacher" ? "#c5b8f5" : "#ddd4f8",
+                border: `3px solid ${selectedRole === "teacher" ? "#a89ae8" : "#c5b8f5"}`,
+                color: "#1a0f6e",
+              }}
+            >
+              <div className="text-lg font-bold">{t(language, "teacher")}</div>
+              <div className="text-xs mt-0.5 opacity-70">{t(language, "teacherDesc")}</div>
+              <div className="mt-2 flex justify-center">
+                <svg className="w-6 h-6 opacity-60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M22 10v6M2 10l10-5 10 5-10 5z" />
+                  <path d="M6 12v5c3 3 9 3 12 0v-5" />
+                </svg>
+              </div>
             </button>
           </div>
 
           {joinError && (
-            <div className="mb-4 px-3 py-2.5 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
+            <div className="mb-4 px-3 py-2.5 rounded-xl text-sm font-medium"
+              style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#991b1b" }}>
               {joinError}
             </div>
           )}
@@ -106,15 +175,16 @@ export default function JoinPage() {
           <button
             onClick={handleJoin}
             disabled={!selectedRole || !name.trim() || !connected}
-            className="w-full py-3 rounded-xl font-semibold text-sm bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white transition-colors"
+            className="px-10 py-3 rounded-2xl text-base font-bold transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ background: "#f0a0b8", color: "#1a0f6e", border: "none" }}
           >
-            {connected ? "Join Session" : "Waiting for connection..."}
+            {joining ? t(language, "joiningSession") : t(language, "ok")}
           </button>
-        </div>
 
-        <p className="text-center text-gray-600 text-xs mt-4">
-          Only one teacher can be active at a time
-        </p>
+          <p className="mt-4 text-xs" style={{ color: "#9b8abf" }}>
+            {t(language, "oneTeacherNote")}
+          </p>
+        </div>
       </div>
     </div>
   );

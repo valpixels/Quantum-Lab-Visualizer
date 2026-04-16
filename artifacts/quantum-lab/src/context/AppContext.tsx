@@ -13,6 +13,8 @@ import {
   TeacherState,
   WSMessage,
 } from "@/lib/websocket";
+import { Language } from "@/lib/i18n";
+import { getProgramStartDate, setProgramStartDate, getCurrentDay, TOTAL_DAYS } from "@/lib/lessons";
 
 interface AppState {
   role: Role | null;
@@ -23,6 +25,10 @@ interface AppState {
   clients: ClientInfo[];
   teacherState: TeacherState;
   joinError: string | null;
+  language: Language;
+  selfTeachingMode: boolean;
+  programStartDate: string | null;
+  currentDay: number;
 }
 
 interface AppContextValue extends AppState {
@@ -30,6 +36,9 @@ interface AppContextValue extends AppState {
   unsync: () => void;
   resync: () => void;
   updateTeacherState: (update: Partial<TeacherState>) => void;
+  setLanguage: (lang: Language) => void;
+  enableSelfTeachingMode: () => void;
+  startProgram: () => void;
 }
 
 const defaultTeacherState: TeacherState = {
@@ -42,15 +51,22 @@ const defaultTeacherState: TeacherState = {
 const AppContext = createContext<AppContextValue | null>(null);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<AppState>({
-    role: null,
-    clientId: null,
-    clientName: null,
-    connected: false,
-    synced: false,
-    clients: [],
-    teacherState: defaultTeacherState,
-    joinError: null,
+  const [state, setState] = useState<AppState>(() => {
+    const programStartDate = getProgramStartDate();
+    return {
+      role: null,
+      clientId: null,
+      clientName: null,
+      connected: false,
+      synced: false,
+      clients: [],
+      teacherState: defaultTeacherState,
+      joinError: null,
+      language: (localStorage.getItem("quantum_lang") as Language) ?? "en",
+      selfTeachingMode: false,
+      programStartDate,
+      currentDay: programStartDate ? getCurrentDay(programStartDate) : 1,
+    };
   });
 
   const joinedRef = useRef(false);
@@ -58,10 +74,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     quantumWS.connect();
 
-    const onConnected = () => {
-      setState((s) => ({ ...s, connected: true }));
-    };
-
+    const onConnected = () => setState((s) => ({ ...s, connected: true }));
     const onDisconnected = () => {
       setState((s) => ({ ...s, connected: false }));
       joinedRef.current = false;
@@ -93,10 +106,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     const onStateSync = (msg: WSMessage) => {
       const payload = msg.payload as { teacherState: TeacherState };
-      setState((s) => ({
-        ...s,
-        teacherState: payload.teacherState,
-      }));
+      setState((s) => ({ ...s, teacherState: payload.teacherState }));
     };
 
     const onClientListUpdate = (msg: WSMessage) => {
@@ -104,9 +114,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setState((s) => ({ ...s, clients: payload.clients }));
     };
 
-    const onUnsyncConfirmed = () => {
-      setState((s) => ({ ...s, synced: false }));
-    };
+    const onUnsyncConfirmed = () => setState((s) => ({ ...s, synced: false }));
 
     quantumWS.on("connected", onConnected);
     quantumWS.on("disconnected", onDisconnected);
@@ -129,10 +137,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const join = useCallback((role: Role, name: string) => {
     setState((s) => ({ ...s, clientName: name, joinError: null }));
-    quantumWS.send({
-      type: "join",
-      payload: { role, name },
-    });
+    quantumWS.send({ type: "join", payload: { role, name } });
   }, []);
 
   const unsync = useCallback(() => {
@@ -147,18 +152,33 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const updateTeacherState = useCallback(
     (update: Partial<TeacherState>) => {
-      if (state.role !== "teacher") return;
-      setState((s) => ({
-        ...s,
-        teacherState: { ...s.teacherState, ...update },
-      }));
-      quantumWS.send({
-        type: "teacher_state_update",
-        payload: update as Record<string, unknown>,
+      setState((s) => {
+        if (s.role !== "teacher") return s;
+        const next = { ...s.teacherState, ...update };
+        quantumWS.send({ type: "teacher_state_update", payload: update as Record<string, unknown> });
+        return { ...s, teacherState: next };
       });
     },
-    [state.role]
+    []
   );
+
+  const setLanguage = useCallback((lang: Language) => {
+    localStorage.setItem("quantum_lang", lang);
+    setState((s) => ({ ...s, language: lang }));
+  }, []);
+
+  const enableSelfTeachingMode = useCallback(() => {
+    setState((s) => ({ ...s, selfTeachingMode: true }));
+  }, []);
+
+  const startProgram = useCallback(() => {
+    const date = setProgramStartDate();
+    setState((s) => ({
+      ...s,
+      programStartDate: date,
+      currentDay: 1,
+    }));
+  }, []);
 
   return (
     <AppContext.Provider
@@ -168,6 +188,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         unsync,
         resync,
         updateTeacherState,
+        setLanguage,
+        enableSelfTeachingMode,
+        startProgram,
       }}
     >
       {children}
