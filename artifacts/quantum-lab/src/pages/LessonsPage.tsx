@@ -225,7 +225,7 @@ function PresentationView({ lesson, onClose }: { lesson: LessonModule; onClose: 
 }
 
 export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }: LessonsPageProps) {
-  const { language, role, teacherState, updateTeacherState } = useApp();
+  const { language, role, teacherState, updateTeacherState, selfTeachingMode, programStartDate, currentDay } = useApp();
   const isRTL = language === "ar";
   const isTeacher = role === "teacher";
 
@@ -236,7 +236,13 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
   const activeLessonId = teacherState.currentLessonId ?? initialLessonId;
   const lesson = activeLessonId ? getLessonById(activeLessonId) : null;
 
-  const handleSelectLesson = (id: string) => {
+  const canAccessLesson = (dayIndex: number) => {
+    if (!selfTeachingMode || !programStartDate) return true;
+    return dayIndex <= currentDay;
+  };
+
+  const handleSelectLesson = (id: string, dayIndex: number) => {
+    if (!canAccessLesson(dayIndex)) return;
     if (isTeacher) updateTeacherState({ currentLessonId: id, activeView: "lessons" });
     setSubView("content");
     setSectionIdx(0);
@@ -256,20 +262,38 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
         <div className="space-y-2">
           {LESSONS.map((l, i) => {
             const isActive = teacherState.currentLessonId === l.id;
+            const unlocked = canAccessLesson(l.dayIndex);
             const bg = lessonColors[i % lessonColors.length];
             const displayTitle = language === "ar" && l.title_ar ? l.title_ar : l.title;
             const displayDesc = language === "ar" && l.description_ar ? l.description_ar : l.description;
             return (
-              <button key={l.id} onClick={() => handleSelectLesson(l.id)} className="w-full flex items-center gap-3 p-3 rounded-2xl transition-all"
-                style={{ background: isActive ? "#1a0f6e" : "white", border: `2px solid ${isActive ? "#1a0f6e" : bg}`, textAlign: isRTL ? "right" : "left" }}>
+              <button key={l.id}
+                onClick={() => handleSelectLesson(l.id, l.dayIndex)}
+                disabled={!unlocked}
+                className="w-full flex items-center gap-3 p-3 rounded-2xl transition-all"
+                style={{
+                  background: isActive ? "#1a0f6e" : "white",
+                  border: `2px solid ${isActive ? "#1a0f6e" : bg}`,
+                  textAlign: isRTL ? "right" : "left",
+                  opacity: unlocked ? 1 : 0.45,
+                  cursor: unlocked ? "pointer" : "not-allowed",
+                }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
-                  style={{ background: bg, color: "#1a0f6e" }}>{l.dayIndex}</div>
+                  style={{ background: bg, color: "#1a0f6e" }}>
+                  {unlocked ? l.dayIndex : "🔒"}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-bold text-sm" style={{ color: isActive ? "white" : "#1a0f6e" }}>{displayTitle}</div>
-                  <div className="text-xs truncate" style={{ color: isActive ? "#c5b8f5" : "#7c6fcd" }}>{displayDesc}</div>
+                  <div className="text-xs truncate" style={{ color: isActive ? "#c5b8f5" : "#7c6fcd" }}>
+                    {unlocked
+                      ? displayDesc
+                      : (language === "ar" ? `متاح في اليوم ${l.dayIndex}` : `Available on Day ${l.dayIndex}`)}
+                  </div>
                 </div>
                 <div className="text-xs font-medium px-2 py-0.5 rounded-full shrink-0"
-                  style={{ background: isActive ? "#c5b8f5" : bg, color: "#1a0f6e" }}>{l.estimatedMinutes}m</div>
+                  style={{ background: isActive ? "#c5b8f5" : bg, color: "#1a0f6e" }}>
+                  {unlocked ? `${l.estimatedMinutes}m` : "—"}
+                </div>
               </button>
             );
           })}
@@ -295,15 +319,28 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
         <div className="px-2 pb-2 space-y-1">
           {LESSONS.map((l, i) => {
             const isActive = lesson.id === l.id;
+            const unlocked = canAccessLesson(l.dayIndex);
             const bg = lessonColors[i % lessonColors.length];
             const displayTitle = language === "ar" && l.title_ar ? l.title_ar : l.title;
             return (
-              <button key={l.id} onClick={() => handleSelectLesson(l.id)}
+              <button key={l.id}
+                onClick={() => handleSelectLesson(l.id, l.dayIndex)}
+                disabled={!unlocked}
                 className="w-full flex items-center gap-2 p-2 rounded-xl transition-all"
-                style={{ background: isActive ? "#1a0f6e" : "white", border: `2px solid ${isActive ? "#1a0f6e" : bg}`, textAlign: isRTL ? "right" : "left" }}>
+                style={{
+                  background: isActive ? "#1a0f6e" : "white",
+                  border: `2px solid ${isActive ? "#1a0f6e" : bg}`,
+                  textAlign: isRTL ? "right" : "left",
+                  opacity: unlocked ? 1 : 0.45,
+                  cursor: unlocked ? "pointer" : "not-allowed",
+                }}>
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center font-black text-xs shrink-0"
-                  style={{ background: bg, color: "#1a0f6e" }}>{l.dayIndex}</div>
-                <span className="text-xs font-bold truncate" style={{ color: isActive ? "white" : "#1a0f6e" }}>{displayTitle}</span>
+                  style={{ background: bg, color: "#1a0f6e" }}>
+                  {unlocked ? l.dayIndex : "🔒"}
+                </div>
+                <span className="text-xs font-bold truncate" style={{ color: isActive ? "white" : "#1a0f6e" }}>
+                  {displayTitle}
+                </span>
               </button>
             );
           })}
