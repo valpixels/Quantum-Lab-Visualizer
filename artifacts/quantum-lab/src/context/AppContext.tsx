@@ -16,6 +16,12 @@ import {
 import { Language } from "@/lib/i18n";
 import { getProgramStartDate, setProgramStartDate, getCurrentDay, TOTAL_DAYS } from "@/lib/lessons";
 
+export interface BroadcastMessage {
+  text: string;
+  from: string;
+  timestamp: number;
+}
+
 interface AppState {
   role: Role | null;
   clientId: string | null;
@@ -29,6 +35,7 @@ interface AppState {
   selfTeachingMode: boolean;
   programStartDate: string | null;
   currentDay: number;
+  broadcastMessages: BroadcastMessage[];
 }
 
 interface AppContextValue extends AppState {
@@ -39,6 +46,8 @@ interface AppContextValue extends AppState {
   setLanguage: (lang: Language) => void;
   enableSelfTeachingMode: () => void;
   startProgram: () => void;
+  sendBroadcast: (text: string) => void;
+  dismissBroadcast: (timestamp: number) => void;
 }
 
 const defaultTeacherState: TeacherState = {
@@ -66,6 +75,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       selfTeachingMode: false,
       programStartDate,
       currentDay: programStartDate ? getCurrentDay(programStartDate) : 1,
+      broadcastMessages: [],
     };
   });
 
@@ -79,7 +89,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setState((s) => ({ ...s, connected: false }));
       joinedRef.current = false;
     };
-
     const onJoined = (msg: WSMessage) => {
       const payload = msg.payload as {
         clientId: string;
@@ -98,23 +107,26 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         joinError: null,
       }));
     };
-
     const onJoinRejected = (msg: WSMessage) => {
       const payload = msg.payload as { reason: string };
       setState((s) => ({ ...s, joinError: payload.reason }));
     };
-
     const onStateSync = (msg: WSMessage) => {
       const payload = msg.payload as { teacherState: TeacherState };
       setState((s) => ({ ...s, teacherState: payload.teacherState }));
     };
-
     const onClientListUpdate = (msg: WSMessage) => {
       const payload = msg.payload as { clients: ClientInfo[] };
       setState((s) => ({ ...s, clients: payload.clients }));
     };
-
     const onUnsyncConfirmed = () => setState((s) => ({ ...s, synced: false }));
+    const onBroadcastMessage = (msg: WSMessage) => {
+      const payload = msg.payload as unknown as BroadcastMessage;
+      setState((s) => ({
+        ...s,
+        broadcastMessages: [...s.broadcastMessages, payload],
+      }));
+    };
 
     quantumWS.on("connected", onConnected);
     quantumWS.on("disconnected", onDisconnected);
@@ -123,6 +135,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     quantumWS.on("state_sync", onStateSync);
     quantumWS.on("client_list_update", onClientListUpdate);
     quantumWS.on("unsync_confirmed", onUnsyncConfirmed);
+    quantumWS.on("broadcast_message", onBroadcastMessage);
 
     return () => {
       quantumWS.off("connected", onConnected);
@@ -132,6 +145,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       quantumWS.off("state_sync", onStateSync);
       quantumWS.off("client_list_update", onClientListUpdate);
       quantumWS.off("unsync_confirmed", onUnsyncConfirmed);
+      quantumWS.off("broadcast_message", onBroadcastMessage);
     };
   }, []);
 
@@ -150,17 +164,14 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setState((s) => ({ ...s, synced: true }));
   }, []);
 
-  const updateTeacherState = useCallback(
-    (update: Partial<TeacherState>) => {
-      setState((s) => {
-        if (s.role !== "teacher") return s;
-        const next = { ...s.teacherState, ...update };
-        quantumWS.send({ type: "teacher_state_update", payload: update as Record<string, unknown> });
-        return { ...s, teacherState: next };
-      });
-    },
-    []
-  );
+  const updateTeacherState = useCallback((update: Partial<TeacherState>) => {
+    setState((s) => {
+      if (s.role !== "teacher") return s;
+      const next = { ...s.teacherState, ...update };
+      quantumWS.send({ type: "teacher_state_update", payload: update as Record<string, unknown> });
+      return { ...s, teacherState: next };
+    });
+  }, []);
 
   const setLanguage = useCallback((lang: Language) => {
     localStorage.setItem("quantum_lang", lang);
@@ -173,10 +184,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const startProgram = useCallback(() => {
     const date = setProgramStartDate();
+    setState((s) => ({ ...s, programStartDate: date, currentDay: 1 }));
+  }, []);
+
+  const sendBroadcast = useCallback((text: string) => {
+    quantumWS.send({ type: "broadcast_message", payload: { text } });
+  }, []);
+
+  const dismissBroadcast = useCallback((timestamp: number) => {
     setState((s) => ({
       ...s,
-      programStartDate: date,
-      currentDay: 1,
+      broadcastMessages: s.broadcastMessages.filter((m) => m.timestamp !== timestamp),
     }));
   }, []);
 
@@ -191,6 +209,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         setLanguage,
         enableSelfTeachingMode,
         startProgram,
+        sendBroadcast,
+        dismissBroadcast,
       }}
     >
       {children}

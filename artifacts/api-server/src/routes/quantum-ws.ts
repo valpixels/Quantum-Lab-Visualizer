@@ -13,10 +13,7 @@ interface Client {
 
 interface TeacherState {
   currentLessonId: string | null;
-  blochState: {
-    theta: number;
-    phi: number;
-  };
+  blochState: { theta: number; phi: number };
   circuitGates: CircuitGate[];
   activeView: "lessons" | "bloch" | "circuit";
 }
@@ -42,7 +39,7 @@ let teacherState: TeacherState = {
   activeView: "lessons",
 };
 
-function broadcast(message: WSMessage, excludeClientId?: string) {
+function broadcastAll(message: WSMessage, excludeClientId?: string) {
   const data = JSON.stringify(message);
   clients.forEach((client, id) => {
     if (id !== excludeClientId && client.ws.readyState === WebSocket.OPEN) {
@@ -54,11 +51,16 @@ function broadcast(message: WSMessage, excludeClientId?: string) {
 function broadcastToSyncedStudents(message: WSMessage) {
   const data = JSON.stringify(message);
   clients.forEach((client) => {
-    if (
-      client.role === "student" &&
-      client.synced &&
-      client.ws.readyState === WebSocket.OPEN
-    ) {
+    if (client.role === "student" && client.synced && client.ws.readyState === WebSocket.OPEN) {
+      client.ws.send(data);
+    }
+  });
+}
+
+function broadcastToAllStudents(message: WSMessage) {
+  const data = JSON.stringify(message);
+  clients.forEach((client) => {
+    if (client.role === "student" && client.ws.readyState === WebSocket.OPEN) {
       client.ws.send(data);
     }
   });
@@ -80,7 +82,7 @@ function hasTeacher(): boolean {
 export function setupWebSocketServer(server: Server) {
   const wss = new WebSocketServer({ server, path: "/ws" });
 
-  wss.on("connection", (ws: WebSocket, req: IncomingMessage) => {
+  wss.on("connection", (ws: WebSocket, _req: IncomingMessage) => {
     const clientId = Math.random().toString(36).substring(2, 10);
     logger.info({ clientId }, "WebSocket client connected");
 
@@ -96,22 +98,15 @@ export function setupWebSocketServer(server: Server) {
 
       switch (msg.type) {
         case "join": {
-          const payload = msg.payload as {
-            role: "teacher" | "student";
-            name: string;
-          };
+          const payload = msg.payload as { role: "teacher" | "student"; name: string };
           const requestedRole = payload?.role;
           const name = payload?.name ?? "Unknown";
 
           if (requestedRole === "teacher" && hasTeacher()) {
-            ws.send(
-              JSON.stringify({
-                type: "join_rejected",
-                payload: {
-                  reason: "A teacher is already active in this session.",
-                },
-              })
-            );
+            ws.send(JSON.stringify({
+              type: "join_rejected",
+              payload: { reason: "A teacher is already active in this session." },
+            }));
             return;
           }
 
@@ -124,26 +119,17 @@ export function setupWebSocketServer(server: Server) {
           };
           clients.set(clientId, newClient);
 
-          ws.send(
-            JSON.stringify({
-              type: "joined",
-              payload: {
-                clientId,
-                role: newClient.role,
-                teacherState,
-                clients: getClientList(),
-              },
-            })
-          );
-
-          broadcast(
-            {
-              type: "client_list_update",
-              payload: { clients: getClientList() },
+          ws.send(JSON.stringify({
+            type: "joined",
+            payload: {
+              clientId,
+              role: newClient.role,
+              teacherState,
+              clients: getClientList(),
             },
-            clientId
-          );
+          }));
 
+          broadcastAll({ type: "client_list_update", payload: { clients: getClientList() } }, clientId);
           logger.info({ clientId, role: newClient.role, name }, "Client joined");
           break;
         }
@@ -152,11 +138,7 @@ export function setupWebSocketServer(server: Server) {
           if (client?.role !== "teacher") break;
           const update = msg.payload as Partial<TeacherState>;
           teacherState = { ...teacherState, ...update };
-
-          broadcastToSyncedStudents({
-            type: "state_sync",
-            payload: { teacherState },
-          });
+          broadcastToSyncedStudents({ type: "state_sync", payload: { teacherState } });
           break;
         }
 
@@ -164,18 +146,8 @@ export function setupWebSocketServer(server: Server) {
           if (!client) break;
           client.synced = false;
           clients.set(clientId, client);
-
-          broadcast({
-            type: "client_list_update",
-            payload: { clients: getClientList() },
-          });
-
-          ws.send(
-            JSON.stringify({
-              type: "unsync_confirmed",
-              payload: {},
-            })
-          );
+          broadcastAll({ type: "client_list_update", payload: { clients: getClientList() } });
+          ws.send(JSON.stringify({ type: "unsync_confirmed", payload: {} }));
           break;
         }
 
@@ -183,18 +155,24 @@ export function setupWebSocketServer(server: Server) {
           if (!client) break;
           client.synced = true;
           clients.set(clientId, client);
+          ws.send(JSON.stringify({ type: "state_sync", payload: { teacherState } }));
+          broadcastAll({ type: "client_list_update", payload: { clients: getClientList() } });
+          break;
+        }
 
-          ws.send(
-            JSON.stringify({
-              type: "state_sync",
-              payload: { teacherState },
-            })
-          );
-
-          broadcast({
-            type: "client_list_update",
-            payload: { clients: getClientList() },
+        case "broadcast_message": {
+          if (client?.role !== "teacher") break;
+          const payload = msg.payload as { text: string };
+          if (!payload?.text?.trim()) break;
+          broadcastToAllStudents({
+            type: "broadcast_message",
+            payload: {
+              text: payload.text.trim(),
+              from: client.name,
+              timestamp: Date.now(),
+            },
           });
+          logger.info({ clientId, text: payload.text }, "Teacher broadcast sent");
           break;
         }
 
@@ -212,11 +190,7 @@ export function setupWebSocketServer(server: Server) {
       const c = clients.get(clientId);
       logger.info({ clientId, role: c?.role }, "WebSocket client disconnected");
       clients.delete(clientId);
-
-      broadcast({
-        type: "client_list_update",
-        payload: { clients: getClientList() },
-      });
+      broadcastAll({ type: "client_list_update", payload: { clients: getClientList() } });
     });
 
     ws.on("error", (err) => {
