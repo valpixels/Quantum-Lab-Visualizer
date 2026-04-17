@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApp } from "@/context/AppContext";
 import { LESSONS, LessonModule, getLessonById } from "@/lib/lessons";
 import { t } from "@/lib/i18n";
@@ -232,9 +232,20 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
   const [subView, setSubView] = useState<SubView>("content");
   const [presenting, setPresenting] = useState(false);
   const [sectionIdx, setSectionIdx] = useState(0);
+  const [blochTheta, setBlochTheta] = useState(0);
+  const [blochPhi, setBlochPhi] = useState(0);
 
   const activeLessonId = teacherState.currentLessonId ?? initialLessonId;
   const lesson = activeLessonId ? getLessonById(activeLessonId) : null;
+
+  // Reset Bloch sphere to the section's default state whenever the section changes
+  useEffect(() => {
+    const s = lesson?.content[sectionIdx];
+    if (s?.blochState) {
+      setBlochTheta(s.blochState.theta);
+      setBlochPhi(s.blochState.phi);
+    }
+  }, [sectionIdx, activeLessonId]);
 
   const canAccessLesson = (dayIndex: number) => {
     if (!selfTeachingMode || !programStartDate) return true;
@@ -412,9 +423,9 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
                       {sectionBody}
                     </div>
 
-                    {section.visualHint === "bloch" && section.blochState && (
+                    {section.visualHint === "bloch" && (
                       <div className="w-56 h-56 rounded-2xl overflow-hidden shrink-0" style={{ background: "#f5f0ff", border: "2px solid #c5b8f5" }}>
-                        <BlochSphere theta={section.blochState.theta} phi={section.blochState.phi} interactive={false} />
+                        <BlochSphere theta={blochTheta} phi={blochPhi} interactive={false} />
                       </div>
                     )}
                   </div>
@@ -428,12 +439,22 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
                         { label: "|-⟩", theta: Math.PI / 2, phi: Math.PI },
                         { label: "|i⟩", theta: Math.PI / 2, phi: Math.PI / 2 },
                         { label: "|-i⟩", theta: Math.PI / 2, phi: (3 * Math.PI) / 2 },
-                      ].map((p) => (
-                        <button key={p.label} className="px-3 py-1.5 rounded-xl text-xs font-bold"
-                          style={{ background: "#a8d8f5", color: "#1a0f6e", border: "2px solid #7ac0e8" }}>
-                          {p.label}
-                        </button>
-                      ))}
+                      ].map((p) => {
+                        const isActive = Math.abs(blochTheta - p.theta) < 0.01 && Math.abs(blochPhi - p.phi) < 0.01;
+                        return (
+                          <button
+                            key={p.label}
+                            onClick={() => { setBlochTheta(p.theta); setBlochPhi(p.phi); }}
+                            className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
+                            style={{
+                              background: isActive ? "#1a0f6e" : "#a8d8f5",
+                              color: isActive ? "white" : "#1a0f6e",
+                              border: `2px solid ${isActive ? "#1a0f6e" : "#7ac0e8"}`,
+                            }}>
+                            {p.label}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
 
