@@ -140,6 +140,11 @@
   [dir="rtl"], [dir="rtl"] * {
     font-family: 'IBM Plex Sans Arabic', system-ui, sans-serif;
   }
+  /* LTR islands inside RTL (e.g. code editors) revert to Latin font */
+  [dir="rtl"] [dir="ltr"],
+  [dir="rtl"] [dir="ltr"] * {
+    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+  }
 }
 
 /* Pastel gate colors for circuit lab */

@@ -152,7 +152,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
       <div className="grid grid-cols-2 gap-4">
         <button
           onClick={() => onNavigate("circuit")}
-          className="p-5 rounded-2xl text-left transition-all hover:scale-105"
+          className="p-5 rounded-2xl text-start transition-all hover:scale-105"
           style={{ background: "#c8eaf8", border: "2px solid #a8d8f5" }}
         >
           <div className="mb-2">
@@ -174,7 +174,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
 
         <button
           onClick={() => onNavigate("bloch")}
-          className="p-5 rounded-2xl text-left transition-all hover:scale-105"
+          className="p-5 rounded-2xl text-start transition-all hover:scale-105"
           style={{ background: "#ddd4f8", border: "2px solid #c5b8f5" }}
         >
           <div className="mb-2">

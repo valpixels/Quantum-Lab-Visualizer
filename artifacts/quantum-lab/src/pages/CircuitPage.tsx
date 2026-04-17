@@ -285,11 +285,12 @@ export default function CircuitPage() {
           )}
         </div>
 
-        {/* QASM Editor */}
-        <div className="flex-1 flex flex-col min-h-0 p-3" style={{ borderTop: "2px solid #f0b8b8" }}>
+        {/* QASM Editor — always LTR, always mono, regardless of app language */}
+        <div className="flex-1 flex flex-col min-h-0 p-3" dir="ltr" style={{ borderTop: "2px solid #f0b8b8" }}>
           <p className="font-black text-xs mb-2 shrink-0" style={{ color: "#1a0f6e" }}>{t(language, "editor")}</p>
-          <div className="flex-1 rounded-xl p-3 font-mono text-xs overflow-auto" style={{ background: "#1a0f6e", color: "#a8d8f5", minHeight: "120px" }}>
-            <pre className="whitespace-pre-wrap">{qasm}</pre>
+          <div className="flex-1 rounded-xl p-3 text-xs overflow-auto"
+            style={{ background: "#1a0f6e", color: "#a8d8f5", minHeight: "120px", fontFamily: "'JetBrains Mono', 'Fira Mono', Menlo, monospace" }}>
+            <pre className="whitespace-pre-wrap" style={{ fontFamily: "inherit" }}>{qasm}</pre>
           </div>
         </div>
       </div>
