@@ -254,7 +254,7 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
 
   const handleSelectLesson = (id: string, dayIndex: number) => {
     if (!canAccessLesson(dayIndex)) return;
-    if (isTeacher) updateTeacherState({ currentLessonId: id, activeView: "lessons" });
+    updateTeacherState({ currentLessonId: id, activeView: "lessons" });
     setSubView("content");
     setSectionIdx(0);
   };
