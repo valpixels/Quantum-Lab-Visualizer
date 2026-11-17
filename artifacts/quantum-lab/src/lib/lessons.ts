@@ -43,221 +43,328 @@ export interface LessonModule {
 }
 
 export const LESSONS: LessonModule[] = [
+  // ───────────────────────────── 1. QUBITS ─────────────────────────────
   {
     id: "qubits-intro",
     title: "Qubits",
     title_ar: "الكيوبتات",
-    description: "What is a qubit? How does it differ from a classical bit, and how do we visualize quantum states?",
-    description_ar: "ما هو الكيوبت؟ كيف يختلف عن البت الكلاسيكي، وكيف نُصوِّر الحالات الكمومية؟",
-    topics: ["Superposition", "Bloch Sphere", "State vectors", "Measurement"],
-    topics_ar: ["التراكب الكمومي", "كرة بلوخ", "متجهات الحالة", "القياس"],
+    description: "What is a qubit, how is it different from a normal bit, and how can we picture it?",
+    description_ar: "ما هو الكيوبت، وكيف يختلف عن البت العادي، وكيف نتخيّله؟",
+    topics: ["Bits vs qubits", "Measurement", "Probability", "Bloch sphere"],
+    topics_ar: ["البت والكيوبت", "القياس", "الاحتمالات", "كرة بلوخ"],
     difficulty: "Beginner",
     estimatedMinutes: 20,
     dayIndex: 1,
     content: [
       {
         id: "q1-1",
-        title: "What is a Qubit?",
-        title_ar: "ما هو الكيوبت؟",
-        body: `A classical bit can only be 0 or 1. A qubit, however, can exist in a superposition of both states simultaneously.
+        title: "Bits and Qubits",
+        title_ar: "البتات والكيوبتات",
+        body: `A classical bit is like a light switch: it is either 0 or 1, and you can look at it as often as you like without changing it.
 
-Mathematically:
-
-|ψ⟩ = α|0⟩ + β|1⟩
-
-where α and β are complex amplitudes satisfying |α|² + |β|² = 1.
-
-When we measure a qubit, it collapses to either |0⟩ with probability |α|² or |1⟩ with probability |β|².`,
-        body_ar: `البت الكلاسيكي لا يمكنه أن يكون إلا 0 أو 1. أما الكيوبت، فيمكنه الوجود في تراكب من الحالتين معاً في آنٍ واحد.
-
-رياضياً:
+A qubit is the quantum version of a bit. Its state is described by two numbers that say how strongly it "leans" toward 0 and toward 1:
 
 |ψ⟩ = α|0⟩ + β|1⟩
 
-حيث α وβ معاملات مركبة تستوفي الشرط: |α|² + |β|² = 1
+α and β are called amplitudes. For now, think of them as ordinary numbers (they are even allowed to be negative).
 
-عند قياس الكيوبت، يتفكك إما إلى |0⟩ باحتمال |α|²، أو إلى |1⟩ باحتمال |β|².`,
+The rule for turning amplitudes into chances:
+• Chance of measuring 0 = |α|²
+• Chance of measuring 1 = |β|²
+• The two chances must add up to 100%: |α|² + |β|² = 1
+
+Example: α = 0.6 and β = 0.8 gives 0.36 (36%) for 0 and 0.64 (64%) for 1. Check: 0.36 + 0.64 = 1 ✓`,
+        body_ar: `البت الكلاسيكي يشبه مفتاح الإضاءة: هو إما 0 أو 1، ويمكنك النظر إليه مرات كثيرة دون أن تغيّره.
+
+الكيوبت هو النسخة الكمومية من البت. تُوصَف حالته بعددين يبيّنان مدى "ميله" نحو 0 ونحو 1:
+
+|ψ⟩ = α|0⟩ + β|1⟩
+
+يُسمّى α وβ السعات (amplitudes). فكّر فيهما الآن كأعداد عادية (ويُسمح لهما حتى أن تكونا سالبتين).
+
+قاعدة تحويل السعات إلى احتمالات:
+• احتمال قياس 0 = |α|²
+• احتمال قياس 1 = |β|²
+• يجب أن يكون مجموع الاحتمالين 100%: |α|² + |β|² = 1
+
+مثال: α = 0.6 وβ = 0.8 تعطي 0.36 (36%) للقيمة 0 و0.64 (64%) للقيمة 1. تحقّق: 0.36 + 0.64 = 1 ✓`,
         visualHint: "bloch",
         blochState: { theta: 0, phi: 0 },
       },
       {
         id: "q1-2",
-        title: "The Bloch Sphere",
-        title_ar: "كرة بلوخ",
-        body: `The Bloch sphere is a geometric representation of the pure state space of a qubit. Any qubit state can be mapped to a point on the sphere:
+        title: "Measuring a Qubit",
+        title_ar: "قياس الكيوبت",
+        body: `Before you measure, a qubit can be a blend of 0 and 1. When you measure it, you always get a plain answer: 0 or 1, never something in between.
 
-|ψ⟩ = cos(θ/2)|0⟩ + e^{iφ}sin(θ/2)|1⟩
+Which answer you get is random, but not always 50/50. For the 36% / 64% qubit from the last section:
+• measure it once → you might get 0 or 1, and you cannot predict which
+• prepare it and measure it 1000 times → about 360 zeros and about 640 ones
 
-• North pole (θ=0): |0⟩ state
-• South pole (θ=π): |1⟩ state
-• Equator: Equal superposition states (like |+⟩ and |-⟩)
+That is why quantum experiments are repeated many times: one result can't show you the amplitudes, but the pattern across many results can.
 
-Interact with the Bloch sphere to explore different quantum states!`,
-        body_ar: `كرة بلوخ هي تمثيل هندسي لفضاء الحالات النقية للكيوبت. يمكن رسم أي حالة كيوبت على نقطة على الكرة:
+After the measurement, the qubit stays in the answer you got. The original blend is gone, so measuring is not a harmless "look" like reading a classical bit.`,
+        body_ar: `قبل القياس، يمكن أن يكون الكيوبت مزيجاً من 0 و1. وعندما تقيسه تحصل دائماً على إجابة واضحة: 0 أو 1، ولا شيء بينهما.
 
-|ψ⟩ = cos(θ/2)|0⟩ + e^{iφ}sin(θ/2)|1⟩
+الإجابة التي تحصل عليها عشوائية، لكنها ليست دائماً 50/50. في الكيوبت (36% / 64%) من القسم السابق:
+• قِسه مرة واحدة ← قد تحصل على 0 أو 1 ولا يمكنك التنبؤ بأيهما
+• جهّزه وقِسه 1000 مرة ← تحصل تقريباً على 360 صفراً و640 واحداً
 
-• القطب الشمالي (θ=0): الحالة |0⟩
-• القطب الجنوبي (θ=π): الحالة |1⟩
-• خط الاستواء: حالات التراكب المتساوي (مثل |+⟩ و|-⟩)
+لهذا تُكرَّر التجارب الكمومية مرات كثيرة: نتيجة واحدة لا تكشف السعات، لكن النمط عبر نتائج كثيرة يكشفها.
 
-تفاعل مع كرة بلوخ لاستكشاف حالات كمومية مختلفة!`,
+بعد القياس يبقى الكيوبت في الإجابة التي حصلت عليها. يزول المزيج الأصلي، فالقياس ليس "نظرة" بريئة كقراءة بت كلاسيكي.`,
         visualHint: "bloch",
         blochState: { theta: Math.PI / 2, phi: 0 },
       },
       {
         id: "q1-3",
-        title: "Common Qubit States",
-        title_ar: "حالات الكيوبت الشائعة",
-        body: `Key states on the Bloch sphere:
+        title: "The Bloch Sphere",
+        title_ar: "كرة بلوخ",
+        body: `The Bloch sphere draws the state of one qubit as an arrow starting at the center of a ball.
 
-|+⟩ = (|0⟩ + |1⟩)/√2  — +X axis  (θ=π/2, φ=0)
-|-⟩ = (|0⟩ - |1⟩)/√2  — -X axis  (θ=π/2, φ=π)
-|i⟩ = (|0⟩ + i|1⟩)/√2 — +Y axis  (θ=π/2, φ=π/2)
+• North pole = |0⟩ (always measures 0)
+• South pole = |1⟩ (always measures 1)
+• Any point on the equator = 50/50 between 0 and 1
+• In between = leaning toward 0 or 1, depending on which pole the arrow is closer to
 
-These are the eigenstates of the Pauli X and Y operators.`,
-        body_ar: `الحالات الرئيسية على كرة بلوخ:
+The points |+⟩ and |−⟩ on the equator are both 50/50, but they sit on opposite sides. They differ in something called phase (the sign between the two parts). Phase doesn't change what you measure right away, but it matters a lot once gates are applied.
 
-|+⟩ = (|0⟩ + |1⟩)/√2  — محور +X  (θ=π/2, φ=0)
-|-⟩ = (|0⟩ - |1⟩)/√2  — محور -X  (θ=π/2, φ=π)
-|i⟩ = (|0⟩ + i|1⟩)/√2 — محور +Y  (θ=π/2, φ=π/2)
+Try it: open the Bloch Sphere lab (unsync from the teacher first if you are following along). Press the presets |0⟩, |1⟩, |+⟩ and |−⟩ and watch the P(|0⟩) bar. Then move the θ slider: the probabilities change. Move the φ slider: the arrow spins around, but the probabilities stay the same!`,
+        body_ar: `تعرض كرة بلوخ حالة كيوبت واحد على شكل سهم يبدأ من مركز كرة.
 
-هذه هي الحالات الذاتية لمشغلَي باولي X وY.`,
+• القطب الشمالي = |0⟩ (يعطي 0 دائماً)
+• القطب الجنوبي = |1⟩ (يعطي 1 دائماً)
+• أي نقطة على خط الاستواء = 50/50 بين 0 و1
+• ما بينهما = ميل نحو 0 أو 1 بحسب القطب الأقرب إلى السهم
+
+النقطتان |+⟩ و|−⟩ على خط الاستواء كلتاهما 50/50 لكنهما على جانبين متقابلين. يختلفان في شيء اسمه الطور (الإشارة بين الجزأين). الطور لا يغيّر ما تقيسه مباشرة، لكنه مهم جداً عند تطبيق البوابات لاحقاً.
+
+جرّب بنفسك: افتح مختبر كرة بلوخ (ألغِ المزامنة مع المعلم أولاً إن كنت تتابع معه). اضغط الحالات الجاهزة |0⟩ و|1⟩ و|+⟩ و|−⟩ وراقب شريط P(|0⟩). ثم حرّك شريط θ: تتغير الاحتمالات. وحرّك شريط φ: يدور السهم لكن الاحتمالات لا تتغير!`,
         visualHint: "bloch",
-        blochState: { theta: Math.PI / 2, phi: Math.PI / 2 },
+        blochState: { theta: Math.PI / 2, phi: 0 },
       },
     ],
     faqs: [
       {
-        question: "Why can't we just say a qubit is 'both 0 and 1 at the same time'?",
-        question_ar: "لماذا لا يمكننا القول إن الكيوبت هو '0 و1 في آنٍ واحد'؟",
-        answer: "That's a common simplification, but it's misleading. A qubit in superposition is not simultaneously 0 AND 1 — it's in a mathematical combination of states with specific amplitudes. When measured, it gives a definite result according to those probabilities. The 'both at once' description misses the phase information that makes quantum computing powerful.",
-        answer_ar: "هذا تبسيط شائع، لكنه مضلل. الكيوبت في التراكب ليس 0 و1 في آنٍ واحد — بل هو في تركيبة رياضية من الحالتين بمعاملات محددة. عند القياس، يعطي نتيجة محددة وفق تلك الاحتمالات. وصف 'الاثنين معاً' يُغفل معلومات الطور التي تجعل الحوسبة الكمومية قوية.",
+        question: "Is a qubit really \"both 0 and 1 at the same time\"?",
+        question_ar: "هل الكيوبت فعلاً \"0 و1 في آنٍ واحد\"؟",
+        answer: "That is a popular shortcut, but it can mislead. A better picture: before measurement, a qubit is in a blend of 0 and 1 described by its amplitudes. It is not secretly a 0 or a 1 that we haven't looked at, and it isn't literally both. When you measure, you get one answer with the probabilities the amplitudes give.",
+        answer_ar: "هذا اختصار شائع لكنه قد يضلّل. الصورة الأفضل: قبل القياس يكون الكيوبت في مزيج من 0 و1 تصفه سعاته. فهو ليس 0 أو 1 مخفياً لم ننظر إليه بعد، وليس كلاهما حرفياً. عند القياس تحصل على إجابة واحدة باحتمالات تحددها السعات.",
       },
       {
-        question: "Can I observe a qubit in superposition without collapsing it?",
-        question_ar: "هل يمكنني مراقبة كيوبت في التراكب دون أن أتسبب في تفككه؟",
-        answer: "No — any interaction that gains information about which state a qubit is in will cause collapse. This is the measurement problem in quantum mechanics. Sophisticated techniques like quantum error correction work around this, but they can't avoid it fundamentally.",
-        answer_ar: "لا — أي تفاعل يكتسب معلومات عن حالة الكيوبت سيؤدي إلى تفككه. هذه هي إشكالية القياس في ميكانيكا الكم. تقنيات متطورة مثل تصحيح الأخطاء الكمومية تتحايل على هذا، لكنها لا تتجنبه بشكل جذري.",
+        question: "Can I look at a qubit without changing it?",
+        question_ar: "هل يمكنني النظر إلى كيوبت دون أن أغيّره؟",
+        answer: "Not if you want to learn whether it is 0 or 1. Measuring a qubit in a blend forces it to pick an answer, and the blend is lost. This is why quantum information is delicate, and also why it can be used for secure communication (see the Cryptography lesson).",
+        answer_ar: "ليس إذا أردت معرفة أهو 0 أم 1. قياس كيوبت في مزيج يجبره على اختيار إجابة، ويضيع المزيج. لهذا تكون المعلومات الكمومية هشّة، ولهذا أيضاً يمكن استخدامها في الاتصالات الآمنة (انظر درس التشفير).",
       },
       {
-        question: "How is a qubit physically implemented?",
-        question_ar: "كيف يُنفَّذ الكيوبت فيزيائياً؟",
-        answer: "There are many physical implementations: superconducting circuits (IBM, Google), trapped ions (IonQ, Honeywell), photonic qubits, nitrogen-vacancy centres in diamond, and topological qubits (Microsoft). Each has different trade-offs in coherence time, gate fidelity, and scalability.",
-        answer_ar: "هناك تطبيقات فيزيائية عديدة: الدوائر فائقة التوصيل (IBM، Google)، الأيونات المحصورة (IonQ، Honeywell)، الكيوبتات الضوئية، مراكز النيتروجين-الفراغ في الماس، والكيوبتات الطوبولوجية (Microsoft). لكل منها مقايضات مختلفة في زمن التماسك ودقة البوابات والقابلية للتوسع.",
+        question: "How are real qubits built?",
+        question_ar: "كيف تُصنع الكيوبتات الحقيقية؟",
+        answer: "There are several approaches: tiny superconducting circuits cooled close to absolute zero (used by IBM and Google), single atoms or ions held by lasers and electric fields (used by IonQ and Quantinuum), particles of light (photons), and more. Each has strengths and weaknesses, and no approach has clearly won yet.",
+        answer_ar: "هناك عدة طرق: دوائر صغيرة فائقة التوصيل تُبرَّد إلى ما يقارب الصفر المطلق (تستخدمها IBM وGoogle)، وذرات أو أيونات مفردة تُمسَك بالليزر والمجالات الكهربائية (تستخدمها IonQ وQuantinuum)، وجسيمات الضوء (الفوتونات)، وغيرها. لكل طريقة مزايا وعيوب، ولم تحسم طريقة واحدة السباق بعد.",
       },
       {
         question: "What is decoherence?",
         question_ar: "ما هو فك التماسك؟",
-        answer: "Decoherence is when a qubit's quantum state becomes entangled with the environment, causing it to lose its quantum properties and behave classically. It's the main challenge in building practical quantum computers. Current qubit coherence times range from microseconds to milliseconds.",
-        answer_ar: "فك التماسك هو عندما تتشابك الحالة الكمومية للكيوبت مع البيئة المحيطة، مما يجعله يفقد خصائصه الكمومية ويتصرف بشكل كلاسيكي. إنه التحدي الرئيسي في بناء حاسبات كمومية عملية. تتراوح أزمنة تماسك الكيوبتات الحالية من ميكروثوانٍ إلى مللي ثوانٍ.",
+        answer: "Qubits are never perfectly alone: heat, vibrations and stray signals slowly disturb them, and they lose their quantum behavior. This is called decoherence. It is the main reason quantum computers need extreme cooling and shielding, and why errors are the biggest challenge in the field.",
+        answer_ar: "الكيوبتات لا تكون معزولة تماماً: الحرارة والاهتزازات والإشارات الشاردة تزعجها ببطء فتفقد سلوكها الكمومي. يُسمّى هذا فك التماسك. وهو السبب الرئيسي لحاجة الحواسيب الكمومية إلى تبريد وعزل شديدين، ولماذا تُعدّ الأخطاء أكبر تحدٍّ في هذا المجال.",
       },
     ],
     quiz: [
       {
-        question: "What happens to a qubit when you measure it?",
-        question_ar: "ماذا يحدث للكيوبت عند قياسه؟",
-        options: ["It stays in superposition", "It collapses to either |0⟩ or |1⟩", "It becomes two bits", "Nothing changes"],
-        options_ar: ["يبقى في التراكب", "يتفكك إلى |0⟩ أو |1⟩", "يصبح بتين", "لا شيء يتغير"],
-        correctIndex: 1,
-        explanation: "Measurement causes the qubit to collapse from its superposition state to a definite classical outcome — either 0 or 1 — with probabilities determined by its amplitudes.",
-        explanation_ar: "يؤدي القياس إلى تفكك الكيوبت من حالة التراكب إلى نتيجة كلاسيكية محددة — إما 0 أو 1 — باحتمالات تحددها معاملاته.",
-      },
-      {
-        question: "Where on the Bloch sphere is the |0⟩ state located?",
-        question_ar: "أين تقع الحالة |0⟩ على كرة بلوخ؟",
-        options: ["South pole", "Equator", "North pole", "Origin"],
-        options_ar: ["القطب الجنوبي", "خط الاستواء", "القطب الشمالي", "المركز"],
+        question: "A qubit has |α|² = 0.25. What is the chance of measuring 1?",
+        question_ar: "في كيوبت كان |α|² = 0.25. ما احتمال الحصول على 1 عند القياس؟",
+        options: ["25%", "50%", "75%", "100%"],
+        options_ar: ["25%", "50%", "75%", "100%"],
         correctIndex: 2,
-        explanation: "The |0⟩ state corresponds to θ=0, which places it at the north pole of the Bloch sphere.",
-        explanation_ar: "تقابل الحالة |0⟩ الزاوية θ=0، مما يضعها عند القطب الشمالي لكرة بلوخ.",
+        explanation: "The two chances must add up to 100%. If the chance of 0 is 25%, the chance of 1 is 100% − 25% = 75%.",
+        explanation_ar: "يجب أن يكون مجموع الاحتمالين 100%. إذا كان احتمال 0 يساوي 25% فاحتمال 1 يساوي 100% − 25% = 75%.",
       },
       {
-        question: "For a qubit |ψ⟩ = α|0⟩ + β|1⟩, what constraint must α and β satisfy?",
-        question_ar: "في الكيوبت |ψ⟩ = α|0⟩ + β|1⟩، ما الشرط الواجب توافره في α وβ؟",
-        options: ["α + β = 1", "|α|² + |β|² = 1", "α = β", "α · β = 0"],
-        options_ar: ["α + β = 1", "|α|² + |β|² = 1", "α = β", "α · β = 0"],
+        question: "You measure a qubit that is in a blend of 0 and 1. What do you see?",
+        question_ar: "تقيس كيوبتاً في مزيج من 0 و1. ماذا ترى؟",
+        options: [
+          "Either 0 or 1, never something in between",
+          "A number between 0 and 1",
+          "Both 0 and 1 at the same time",
+          "Nothing, the qubit disappears",
+        ],
+        options_ar: [
+          "إما 0 أو 1، ولا شيء بينهما",
+          "عدداً بين 0 و1",
+          "0 و1 معاً في الوقت نفسه",
+          "لا شيء، يختفي الكيوبت",
+        ],
+        correctIndex: 0,
+        explanation: "A measurement always gives a plain classical answer, 0 or 1. Which one you get is random, with the probabilities set by the amplitudes.",
+        explanation_ar: "القياس يعطي دائماً إجابة كلاسيكية واضحة: 0 أو 1. والإجابة التي تحصل عليها عشوائية باحتمالات تحددها السعات.",
+      },
+      {
+        question: "Which point on the Bloch sphere gives 0 or 1 with a 50/50 chance?",
+        question_ar: "أي نقطة على كرة بلوخ تعطي 0 أو 1 باحتمال 50/50؟",
+        options: [
+          "The North pole",
+          "The South pole",
+          "The center of the ball",
+          "Any point on the equator",
+        ],
+        options_ar: [
+          "القطب الشمالي",
+          "القطب الجنوبي",
+          "مركز الكرة",
+          "أي نقطة على خط الاستواء",
+        ],
+        correctIndex: 3,
+        explanation: "The poles are the certain states |0⟩ and |1⟩. Every point on the equator is exactly halfway between them, so it measures 0 or 1 with equal chance.",
+        explanation_ar: "القطبان هما الحالتان المؤكدتان |0⟩ و|1⟩. وكل نقطة على خط الاستواء تقع في منتصف المسافة بينهما، فتعطي 0 أو 1 باحتمال متساوٍ.",
+      },
+      {
+        question: "Why do experiments measure the same prepared qubit state many times?",
+        question_ar: "لماذا تقيس التجارب الحالة المجهّزة نفسها مرات كثيرة؟",
+        options: [
+          "Because the qubit wears out",
+          "One result shows only 0 or 1; many results reveal the probabilities",
+          "To make the qubit more accurate",
+          "Because computers make mistakes",
+        ],
+        options_ar: [
+          "لأن الكيوبت يتعب",
+          "نتيجة واحدة تُظهر 0 أو 1 فقط؛ ونتائج كثيرة تكشف الاحتمالات",
+          "لجعل الكيوبت أدق",
+          "لأن الحواسيب تخطئ",
+        ],
         correctIndex: 1,
-        explanation: "The normalization constraint requires |α|² + |β|² = 1, ensuring that measurement probabilities sum to 1.",
-        explanation_ar: "تشترط قيد التسوية أن يكون |α|² + |β|² = 1، لضمان أن مجموع احتمالات القياس يساوي 1.",
+        explanation: "A single measurement can't tell you the amplitudes. Repeating many times shows how often 0 and 1 appear, which reveals the probabilities.",
+        explanation_ar: "القياس الواحد لا يكشف السعات. أما التكرار مرات كثيرة فيُظهر عدد مرات ظهور 0 و1، وهذا يكشف الاحتمالات.",
       },
     ],
   },
+
+  // ─────────────────────── 2. SUPERPOSITION & GATES ───────────────────────
   {
     id: "superposition",
-    title: "Superposition",
-    title_ar: "التراكب الكمومي",
-    description: "Deep dive into quantum superposition — what it means mathematically and why it's a computational resource.",
-    description_ar: "غوص عميق في التراكب الكمومي — ما معناه رياضياً ولماذا يُعدّ مورداً حسابياً.",
-    topics: ["Wave functions", "Interference", "Quantum parallelism"],
-    topics_ar: ["دوال الموجة", "التداخل", "التوازي الكمومي"],
+    title: "Superposition & Gates",
+    title_ar: "التراكب والبوابات",
+    description: "Meet the basic quantum gates, build a superposition with the Hadamard gate, and discover interference.",
+    description_ar: "تعرّف على البوابات الكمومية الأساسية، وأنشئ تراكباً ببوابة هادامار، واكتشف التداخل.",
+    topics: ["Quantum gates", "Hadamard gate", "Interference", "Many qubits"],
+    topics_ar: ["البوابات الكمومية", "بوابة هادامار", "التداخل", "كيوبتات متعددة"],
     difficulty: "Beginner",
     estimatedMinutes: 25,
     dayIndex: 2,
     content: [
       {
         id: "sup-1",
-        title: "The Principle of Superposition",
-        title_ar: "مبدأ التراكب",
-        body: `Superposition is one of the core principles of quantum mechanics. Unlike classical systems, quantum systems can exist in a linear combination of multiple states simultaneously.
+        title: "Quantum Gates",
+        title_ar: "البوابات الكمومية",
+        body: `A quantum gate is an operation that changes the state of a qubit, just like a classical logic gate (NOT, AND, ...) changes bits. On the Bloch sphere, gates turn the arrow.
 
-For a single qubit:
-|ψ⟩ = α|0⟩ + β|1⟩
+Three gates to know:
+• X gate: the quantum NOT. It turns |0⟩ into |1⟩ and |1⟩ into |0⟩ (the arrow goes from the North pole to the South pole).
+• H gate (Hadamard): turns a definite 0 or 1 into a 50/50 blend. The arrow moves from a pole to the equator.
+• Z gate: leaves the chances of 0 and 1 alone but flips the sign of the |1⟩ part. On the sphere it spins the arrow half a turn around the vertical axis, so |+⟩ becomes |−⟩.
 
-For two qubits, superposition over 4 states:
-|ψ⟩ = α|00⟩ + β|01⟩ + γ|10⟩ + δ|11⟩
+Two facts about all quantum gates:
+• They can always be undone: apply the right gate afterwards and you are back where you started.
+• In a circuit, time runs from left to right. Each horizontal line is one qubit and each box on it is a gate.
 
-For n qubits: superposition over 2ⁿ states simultaneously!`,
-        body_ar: `التراكب هو أحد المبادئ الجوهرية لميكانيكا الكم. على عكس الأنظمة الكلاسيكية، يمكن للأنظمة الكمومية أن تتواجد في تركيبة خطية من حالات متعددة في آنٍ واحد.
+Try it: open the Circuit Lab and drag an X gate onto the wire q[0]. That small circuit is the quantum NOT.`,
+        body_ar: `البوابة الكمومية عملية تغيّر حالة الكيوبت، تماماً كما تغيّر البوابة المنطقية الكلاسيكية (NOT وAND ...) البتات. وعلى كرة بلوخ تُدير البوابات السهم.
 
-لكيوبت واحد:
-|ψ⟩ = α|0⟩ + β|1⟩
+ثلاث بوابات يجب أن تعرفها:
+• بوابة X: هي NOT الكمومية. تحوّل |0⟩ إلى |1⟩ و|1⟩ إلى |0⟩ (ينتقل السهم من القطب الشمالي إلى الجنوبي).
+• بوابة H (هادامار): تحوّل 0 أو 1 المؤكد إلى مزيج 50/50. ينتقل السهم من أحد القطبين إلى خط الاستواء.
+• بوابة Z: تترك احتمالي 0 و1 كما هما لكنها تقلب إشارة الجزء |1⟩. وعلى الكرة تدير السهم نصف دورة حول المحور الرأسي، فتصبح |+⟩ هي |−⟩.
 
-لكيوبتين، التراكب على 4 حالات:
-|ψ⟩ = α|00⟩ + β|01⟩ + γ|10⟩ + δ|11⟩
+حقيقتان عن كل البوابات الكمومية:
+• يمكن دائماً التراجع عنها: طبّق البوابة المناسبة بعدها فتعود إلى حيث بدأت.
+• في الدائرة يسير الزمن من اليسار إلى اليمين. كل خط أفقي هو كيوبت، وكل مربع عليه هو بوابة.
 
-لـ n كيوبت: التراكب على 2ⁿ حالة في آنٍ واحد!`,
+جرّب بنفسك: افتح مختبر الدوائر واسحب بوابة X إلى السلك q[0]. هذه الدائرة الصغيرة هي NOT الكمومية.`,
+        visualHint: "bloch",
+        blochState: { theta: 0, phi: 0 },
+      },
+      {
+        id: "sup-2",
+        title: "The Hadamard Gate",
+        title_ar: "بوابة هادامار",
+        body: `The Hadamard gate (H) is the most common way to create a superposition.
+
+H|0⟩ = (|0⟩ + |1⟩)/√2 = |+⟩
+H|1⟩ = (|0⟩ − |1⟩)/√2 = |−⟩
+
+Both results are 50/50: each amplitude is 1/√2 ≈ 0.707, and 0.707² ≈ 0.5. The only difference between them is the sign (the phase).
+
+If you measure right after H, you get 0 or 1 at random with equal chance. For an ideal qubit this randomness is fundamental, unlike the pseudo-random numbers a normal computer produces.
+
+Try it: in the Circuit Lab place an H gate on q[0]. Then in the Bloch Sphere lab press |0⟩ and then |+⟩ to see what H does to the arrow.`,
+        body_ar: `بوابة هادامار (H) هي الطريقة الأكثر شيوعاً لإنشاء تراكب.
+
+H|0⟩ = (|0⟩ + |1⟩)/√2 = |+⟩
+H|1⟩ = (|0⟩ − |1⟩)/√2 = |−⟩
+
+النتيجتان كلتاهما 50/50: كل سعة تساوي 1/√2 ≈ 0.707، و0.707² ≈ 0.5. والفرق الوحيد بينهما هو الإشارة (الطور).
+
+إذا قست مباشرة بعد H تحصل على 0 أو 1 عشوائياً بفرصة متساوية. وفي كيوبت مثالي تكون هذه العشوائية جوهرية، بخلاف الأعداد شبه العشوائية التي يولّدها الحاسوب العادي.
+
+جرّب بنفسك: في مختبر الدوائر ضع بوابة H على q[0]. ثم في مختبر كرة بلوخ اضغط |0⟩ ثم |+⟩ لترى ما تفعله H بالسهم.`,
         visualHint: "bloch",
         blochState: { theta: Math.PI / 2, phi: 0 },
       },
       {
-        id: "sup-2",
+        id: "sup-3",
         title: "Interference",
         title_ar: "التداخل",
-        body: `Superposition enables quantum interference — amplitudes can add constructively (making outcomes more likely) or destructively (making outcomes less likely).
+        body: `Is superposition just randomness? Here is a test. Start with |0⟩, apply H, then apply H again, then measure.
 
-This is analogous to wave interference in physics. Quantum algorithms exploit interference to amplify the probability of correct answers and suppress wrong answers.
+If the first H were just a coin flip, the second H couldn't make the result certain. But in reality you get 0 every single time. Why?
 
-The Hadamard gate creates equal superposition: H|0⟩ = (|0⟩ + |1⟩)/√2
+Amplitudes can be positive or negative, and they add up like waves:
+• Two routes lead to |0⟩: they give +½ and +½, which add up to 1.
+• Two routes lead to |1⟩: they give +½ and −½, which cancel to 0.
 
-Applying H twice: H(H|0⟩) = |0⟩ — the amplitudes interfere perfectly back to the start.`,
-        body_ar: `يُتيح التراكب التداخل الكمومي — يمكن للمعاملات أن تتراكم بشكل بنّاء (مما يجعل النتائج أكثر احتمالاً) أو مدمِّر (مما يجعلها أقل احتمالاً).
+Amplitudes that add up are called constructive interference. Amplitudes that cancel are called destructive interference (just like noise-cancelling headphones).
 
-هذا مشابه لتداخل الأمواج في الفيزياء. تستغل الخوارزميات الكمومية التداخل لتضخيم احتمال الإجابات الصحيحة وإخماد الإجابات الخاطئة.
+Interference is the engine of quantum algorithms: the circuit is designed so that wrong answers cancel and the right answer adds up.
 
-بوابة هادامار تخلق تراكباً متساوياً: H|0⟩ = (|0⟩ + |1⟩)/√2
+Try it: in the Circuit Lab place two H gates in a row on q[0] and compare with a single H.`,
+        body_ar: `هل التراكب مجرد عشوائية؟ إليك اختباراً. ابدأ بـ |0⟩ ثم طبّق H ثم H مرة أخرى ثم قِس.
 
-تطبيق H مرتين: H(H|0⟩) = |0⟩ — تتداخل المعاملات لتعود إلى نقطة البداية.`,
+لو كانت H الأولى مجرد رمية عملة لما استطاعت H الثانية أن تجعل النتيجة مؤكدة. لكنك في الواقع تحصل على 0 في كل مرة. لماذا؟
+
+السعات يمكن أن تكون موجبة أو سالبة، وهي تُجمَع كما تُجمَع الأمواج:
+• هناك طريقان يؤديان إلى |0⟩: يعطيان +½ و+½ فيكون المجموع 1.
+• وهناك طريقان يؤديان إلى |1⟩: يعطيان +½ و−½ فيلغي كل منهما الآخر ويصبح المجموع 0.
+
+السعات التي تتجمع تُسمّى تداخلاً بنّاءً، والتي تلغي بعضها تُسمّى تداخلاً هدّاماً (كما تفعل سمّاعات إلغاء الضجيج).
+
+التداخل هو محرّك الخوارزميات الكمومية: تُصمَّم الدائرة بحيث تلغي الإجابات الخاطئة بعضها وتتجمع الإجابة الصحيحة.
+
+جرّب بنفسك: في مختبر الدوائر ضع بوابتي H متتاليتين على q[0] وقارن مع بوابة H واحدة.`,
         visualHint: "circuit",
       },
       {
-        id: "sup-3",
-        title: "Quantum Parallelism",
-        title_ar: "التوازي الكمومي",
-        body: `Because n qubits can be in superposition of 2ⁿ states, a quantum computer can evaluate a function on all 2ⁿ inputs simultaneously — quantum parallelism.
+        id: "sup-4",
+        title: "More Qubits, More Possibilities",
+        title_ar: "كيوبتات أكثر، احتمالات أكثر",
+        body: `One qubit needs 2 amplitudes (one for 0, one for 1). Two qubits need 4 (00, 01, 10, 11). In general, n qubits need 2ⁿ amplitudes:
 
-However, measurement collapses this to just one answer. The trick of quantum algorithms is to engineer interference so the desired answer has high probability when measured.
+• 2 qubits → 4 amplitudes
+• 10 qubits → 1,024 amplitudes
+• 50 qubits → more than a million billion (about 10¹⁵) amplitudes
 
-10 qubits → 1,024 parallel computations
-50 qubits → over 10¹⁵ parallel computations
-300 qubits → more states than atoms in the observable universe!`,
-        body_ar: `لأن n كيوبت يمكنها أن تكون في تراكب من 2ⁿ حالة، يمكن للحاسوب الكمومي تقييم دالة على جميع 2ⁿ مدخلات في آنٍ واحد — التوازي الكمومي.
+This is why simulating many qubits on a normal computer gets very hard, very quickly.
 
-لكن القياس يُفكك هذا إلى إجابة واحدة فقط. حيلة الخوارزميات الكمومية هي هندسة التداخل بحيث تكون الإجابة المطلوبة ذات احتمال عالٍ عند القياس.
+But there is a catch: when you measure n qubits you only get n ordinary bits, one result. A quantum computer does not "try every answer at once and hand you the best one". Useful quantum algorithms need clever circuits that use interference so the right answer becomes likely.`,
+        body_ar: `كيوبت واحد يحتاج إلى سعتين (واحدة لـ 0 وواحدة لـ 1). وكيوبتان يحتاجان إلى 4 (00 و01 و10 و11). وبوجه عام يحتاج n من الكيوبتات إلى 2ⁿ من السعات:
 
-10 كيوبت → 1,024 عملية حسابية متوازية
-50 كيوبت → أكثر من 10¹⁵ عملية متوازية
-300 كيوبت → حالات أكثر من ذرات الكون المرئي!`,
+• كيوبتان ← 4 سعات
+• 10 كيوبتات ← 1,024 سعة
+• 50 كيوبتاً ← أكثر من مليون مليار (نحو 10¹⁵) سعة
+
+لهذا تصبح محاكاة كيوبتات كثيرة على حاسوب عادي صعبة جداً وبسرعة كبيرة.
+
+لكن هناك محاذير: عندما تقيس n من الكيوبتات فإنك تحصل على n من البتات العادية فقط، أي نتيجة واحدة. والحاسوب الكمومي لا "يجرّب كل الإجابات دفعة واحدة ويعطيك أفضلها". الخوارزميات الكمومية المفيدة تحتاج إلى دوائر ذكية تستخدم التداخل لتصبح الإجابة الصحيحة هي المحتملة.`,
         visualHint: "none",
       },
     ],
@@ -265,534 +372,857 @@ However, measurement collapses this to just one answer. The trick of quantum alg
       {
         question: "Is superposition the same as randomness?",
         question_ar: "هل التراكب هو نفسه العشوائية؟",
-        answer: "No — superposition is fundamentally different from classical randomness. A coin that we haven't looked at is definitely either heads or tails; we just don't know which. A qubit in superposition is genuinely neither — it doesn't have a definite value until measured.",
-        answer_ar: "لا — التراكب مختلف جوهرياً عن العشوائية الكلاسيكية. عملة لم ننظر إليها هي بالتأكيد إما وجه أو ظهر؛ نحن فقط لا نعلم. أما الكيوبت في التراكب فليس لديه قيمة محددة حقاً قبل القياس.",
+        answer: "No. A hidden coin is just heads or tails and we don't know which. A qubit in superposition can show interference: apply H twice and you get a certain result, which ordinary uncertainty can never do. The amplitudes (including their signs) really matter.",
+        answer_ar: "لا. العملة المخفية هي وجه أو ظهر ونحن فقط لا نعرف أيهما. أما الكيوبت في التراكب فيُظهر التداخل: طبّق H مرتين وستحصل على نتيجة مؤكدة، وهذا لا يمكن أن تفعله عدم المعرفة العادية. السعات (بما فيها إشاراتها) مهمة فعلاً.",
       },
       {
-        question: "Can macroscopic objects be in superposition?",
-        question_ar: "هل يمكن للأجسام الكبيرة أن تكون في تراكب؟",
-        answer: "In principle, yes — quantum mechanics applies to all matter. However, large objects interact with so many environmental particles that decoherence happens almost instantaneously. Schrödinger's cat was a thought experiment to highlight this paradox.",
-        answer_ar: "من حيث المبدأ، نعم — تنطبق ميكانيكا الكم على كل المادة. لكن الأجسام الكبيرة تتفاعل مع الكثير من جسيمات البيئة لدرجة أن فك التماسك يحدث بشكل فوري تقريباً. قطة شرودنغر كانت تجربة فكرية لتسليط الضوء على هذه المفارقة.",
+        question: "Can everyday objects be in superposition?",
+        question_ar: "هل يمكن للأجسام اليومية أن تكون في تراكب؟",
+        answer: "The rules of quantum physics apply to everything in principle, but big objects constantly interact with air, light and heat. That destroys the delicate quantum behavior almost instantly (decoherence). Schrödinger's cat is a thought experiment about this puzzle, not a real experiment.",
+        answer_ar: "من حيث المبدأ تنطبق قواعد فيزياء الكم على كل شيء، لكن الأجسام الكبيرة تتفاعل باستمرار مع الهواء والضوء والحرارة، وهذا يدمّر السلوك الكمومي الدقيق بشكل شبه فوري (فك التماسك). قطة شرودنغر تجربة فكرية حول هذه المعضلة، وليست تجربة حقيقية.",
       },
       {
-        question: "Does quantum parallelism mean quantum computers are always faster?",
-        question_ar: "هل يعني التوازي الكمومي أن الحواسيب الكمومية دائماً أسرع؟",
-        answer: "No — quantum parallelism is not 'free'. Because measurement collapses superposition to one outcome, you need clever algorithms that use interference. Not all problems benefit from this. Quantum computers have specific advantages for certain problem types.",
-        answer_ar: "لا — التوازي الكمومي ليس 'مجانياً'. لأن القياس يُفكك التراكب إلى نتيجة واحدة، تحتاج إلى خوارزميات ذكية تستخدم التداخل. لا تستفيد جميع المسائل من هذا. للحواسيب الكمومية مزايا محددة لأنواع معينة من المسائل.",
+        question: "Are quantum computers always faster than normal computers?",
+        question_ar: "هل الحواسيب الكمومية دائماً أسرع من الحواسيب العادية؟",
+        answer: "No. They are expected to help with certain kinds of problems only. For everyday tasks like browsing, games or spreadsheets, normal computers are better and far cheaper.",
+        answer_ar: "لا. يُتوقع أن تفيد في أنواع معينة من المسائل فقط. أما المهام اليومية كتصفح الإنترنت والألعاب والجداول فالحواسيب العادية أفضل وأرخص بكثير.",
+      },
+      {
+        question: "If the Z gate doesn't change the chances of 0 and 1, what is it for?",
+        question_ar: "إذا كانت بوابة Z لا تغيّر احتمالي 0 و1، فما فائدتها؟",
+        answer: "Z changes the phase (the sign of the |1⟩ part). You can't see that by measuring right away, but it changes how later gates combine the amplitudes. For example, applying H, then Z, then H turns |0⟩ into |1⟩, exactly like an X gate.",
+        answer_ar: "تغيّر Z الطور (إشارة الجزء |1⟩). لا يمكنك رؤية ذلك بالقياس مباشرة، لكنه يغيّر طريقة جمع البوابات اللاحقة للسعات. فمثلاً تطبيق H ثم Z ثم H يحوّل |0⟩ إلى |1⟩ تماماً كبوابة X.",
       },
     ],
     quiz: [
       {
-        question: "What does the Hadamard gate do to |0⟩?",
-        question_ar: "ماذا تفعل بوابة هادامار بالحالة |0⟩؟",
-        options: ["Leaves it unchanged", "Flips it to |1⟩", "Creates equal superposition (|0⟩ + |1⟩)/√2", "Applies a phase shift"],
-        options_ar: ["تتركها دون تغيير", "تقلبها إلى |1⟩", "تخلق تراكباً متساوياً (|0⟩ + |1⟩)/√2", "تطبق إزاحة طور"],
-        correctIndex: 2,
-        explanation: "The Hadamard gate H creates an equal superposition: H|0⟩ = (|0⟩ + |1⟩)/√2 = |+⟩",
-        explanation_ar: "بوابة هادامار H تخلق تراكباً متساوياً: H|0⟩ = (|0⟩ + |1⟩)/√2 = |+⟩",
+        question: "Which gate is the quantum NOT, turning |0⟩ into |1⟩?",
+        question_ar: "أي بوابة هي NOT الكمومية التي تحوّل |0⟩ إلى |1⟩؟",
+        options: ["The H gate", "The Z gate", "The SWAP gate", "The X gate"],
+        options_ar: ["بوابة H", "بوابة Z", "بوابة SWAP", "بوابة X"],
+        correctIndex: 3,
+        explanation: "The X gate flips |0⟩ to |1⟩ and |1⟩ to |0⟩. H makes a 50/50 blend, Z changes only the sign, and SWAP exchanges two qubits.",
+        explanation_ar: "تقلب بوابة X الحالة |0⟩ إلى |1⟩ و|1⟩ إلى |0⟩. أما H فتصنع مزيجاً 50/50، وZ تغيّر الإشارة فقط، وSWAP تبدّل بين كيوبتين.",
       },
       {
-        question: "How many states can 8 qubits be in superposition over?",
-        question_ar: "على كم حالة يمكن لـ 8 كيوبتات أن تكون في تراكب؟",
-        options: ["8", "16", "64", "256"],
-        options_ar: ["8", "16", "64", "256"],
-        correctIndex: 3,
-        explanation: "n qubits can be in superposition of 2ⁿ states. 2⁸ = 256 states.",
-        explanation_ar: "يمكن لـ n كيوبت أن تكون في تراكب من 2ⁿ حالة. 2⁸ = 256 حالة.",
+        question: "You apply H to |0⟩ and then measure. What do you see?",
+        question_ar: "تطبّق H على |0⟩ ثم تقيس. ماذا ترى؟",
+        options: [
+          "0 or 1, each about half the time",
+          "Always 0",
+          "Always 1",
+          "Something between 0 and 1",
+        ],
+        options_ar: [
+          "0 أو 1، كلٌّ منهما في نحو نصف المرات",
+          "0 دائماً",
+          "1 دائماً",
+          "شيئاً بين 0 و1",
+        ],
+        correctIndex: 0,
+        explanation: "H|0⟩ is an equal blend of 0 and 1, so each answer appears with 50% chance.",
+        explanation_ar: "الحالة H|0⟩ مزيج متساوٍ من 0 و1، فتظهر كل إجابة باحتمال 50%.",
+      },
+      {
+        question: "You apply H twice to |0⟩ and then measure. What happens, and why?",
+        question_ar: "تطبّق H مرتين على |0⟩ ثم تقيس. ماذا يحدث ولماذا؟",
+        options: [
+          "Random 0 or 1 again, because H is random",
+          "Always 1, because H flips the qubit",
+          "Always 0, because the two routes to |1⟩ cancel",
+          "It depends on how fast you apply the gates",
+        ],
+        options_ar: [
+          "0 أو 1 عشوائياً مرة أخرى لأن H عشوائية",
+          "1 دائماً لأن H تقلب الكيوبت",
+          "0 دائماً لأن الطريقين المؤديين إلى |1⟩ يلغي كل منهما الآخر",
+          "يعتمد على سرعة تطبيق البوابات",
+        ],
+        correctIndex: 2,
+        explanation: "The two routes to |1⟩ have amplitudes +½ and −½ and cancel (destructive interference), while the two routes to |0⟩ add up (constructive interference).",
+        explanation_ar: "الطريقان المؤديان إلى |1⟩ سعتاهما +½ و−½ فتلغيان بعضهما (تداخل هدّام)، بينما يتجمع الطريقان المؤديان إلى |0⟩ (تداخل بنّاء).",
+      },
+      {
+        question: "How many amplitudes are needed to describe 5 qubits?",
+        question_ar: "كم سعة نحتاج لوصف 5 كيوبتات؟",
+        options: ["10", "32", "25", "5"],
+        options_ar: ["10", "32", "25", "5"],
+        correctIndex: 1,
+        explanation: "n qubits need 2ⁿ amplitudes. For 5 qubits that is 2⁵ = 32.",
+        explanation_ar: "يحتاج n من الكيوبتات إلى 2ⁿ من السعات. وفي 5 كيوبتات يكون ذلك 2⁵ = 32.",
       },
     ],
   },
+
+  // ───────────────────────────── 3. ENTANGLEMENT ─────────────────────────────
   {
     id: "entanglement",
     title: "Entanglement",
     title_ar: "التشابك الكمومي",
-    description: "Explore quantum entanglement — Einstein's 'spooky action at a distance' and its role in quantum computing.",
-    description_ar: "استكشف التشابك الكمومي — 'الفعل الشبحي عن بُعد' لأينشتاين ودوره في الحوسبة الكمومية.",
-    topics: ["Bell states", "EPR pairs", "Non-locality", "Teleportation"],
-    topics_ar: ["حالات بيل", "أزواج EPR", "اللامحلية", "الإرسال الكمومي"],
+    description: "Build a Bell pair and explore the strange link between entangled qubits, and what it can and can't do.",
+    description_ar: "أنشئ زوج بيل واستكشف الرابط الغريب بين الكيوبتات المتشابكة، وما يمكنه فعله وما لا يمكنه.",
+    topics: ["Entangled pairs", "Bell state", "CNOT gate", "Limits of entanglement"],
+    topics_ar: ["الأزواج المتشابكة", "حالة بيل", "بوابة CNOT", "حدود التشابك"],
     difficulty: "Intermediate",
-    estimatedMinutes: 30,
+    estimatedMinutes: 25,
     dayIndex: 3,
     content: [
       {
         id: "ent-1",
-        title: "What is Entanglement?",
+        title: "What Is Entanglement?",
         title_ar: "ما هو التشابك الكمومي؟",
-        body: `Quantum entanglement occurs when two or more qubits become correlated such that the state of each cannot be described independently — even when separated by large distances.
+        body: `Two qubits are entangled when they share one joint state that cannot be split into "the state of qubit A" and "the state of qubit B".
 
-Einstein called it 'spooky action at a distance.' Unlike classical correlations, entanglement involves genuine quantum correlations that violate Bell inequalities.
+The most famous example is the Bell state:
 
-To create entanglement:
-1. Apply H to qubit 0 → superposition
-2. Apply CNOT with qubit 0 as control → entanglement!`,
-        body_ar: `يحدث التشابك الكمومي عندما يصبح كيوبتان أو أكثر مترابطَين بحيث لا يمكن وصف حالة كل منهما بشكل مستقل — حتى عند فصلهما بمسافات كبيرة.
+(|00⟩ + |11⟩)/√2
 
-أسماه أينشتاين 'الفعل الشبحي عن بُعد.' على عكس الارتباطات الكلاسيكية، يتضمن التشابك ارتباطات كمومية حقيقية تنتهك متراجحات بيل.
+If you measure both qubits:
+• Each qubit on its own gives 0 or 1 at random, 50/50.
+• But the two results are always the same: 00 or 11, never 01 or 10.
 
-لإنشاء التشابك:
-1. طبّق H على الكيوبت 0 ← تراكب
-2. طبّق CNOT مع الكيوبت 0 كمتحكم ← تشابك!`,
-        visualHint: "circuit",
+Isn't that just like a pair of gloves, where finding a left glove tells you the other is a right glove? Not quite. With gloves the answer was fixed in advance. In the 1960s, John Bell showed that if you measure entangled qubits in different ways, the results are correlated more strongly than any "fixed in advance" explanation allows. Experiments have confirmed this, and the 2022 Nobel Prize in Physics was awarded for them.`,
+        body_ar: `يكون كيوبتان متشابكين عندما يشتركان في حالة واحدة مشتركة لا يمكن تقسيمها إلى "حالة الكيوبت A" و"حالة الكيوبت B".
+
+أشهر مثال هو حالة بيل:
+
+(|00⟩ + |11⟩)/√2
+
+إذا قست الكيوبتين معاً:
+• كل كيوبت وحده يعطي 0 أو 1 عشوائياً بنسبة 50/50.
+• لكن النتيجتين تكونان دائماً متطابقتين: 00 أو 11، ولا تكونان أبداً 01 أو 10.
+
+أليس هذا كزوج القفازات، حيث تخبرك رؤية القفاز الأيسر أن الآخر أيمن؟ ليس تماماً. في القفازات كانت الإجابة محددة مسبقاً. وفي ستينيات القرن العشرين بيّن جون بيل أنك إذا قست كيوبتات متشابكة بطرق مختلفة فإن النتائج ترتبط ارتباطاً أقوى مما يسمح به أي تفسير "محدد مسبقاً". وقد أكّدت التجارب ذلك، ومُنحت جائزة نوبل في الفيزياء لعام 2022 عنها.`,
+        visualHint: "none",
       },
       {
         id: "ent-2",
-        title: "Bell States",
-        title_ar: "حالات بيل",
-        body: `The four maximally entangled two-qubit Bell states:
+        title: "Build a Bell Pair",
+        title_ar: "أنشئ زوج بيل",
+        body: `Only two steps are needed. Start with both qubits in |0⟩:
 
-|Φ+⟩ = (|00⟩ + |11⟩)/√2
-|Φ-⟩ = (|00⟩ - |11⟩)/√2
-|Ψ+⟩ = (|01⟩ + |10⟩)/√2
-|Ψ-⟩ = (|01⟩ - |10⟩)/√2
+1. Apply H to qubit 0 → qubit 0 becomes a 50/50 blend.
+2. Apply CNOT with qubit 0 as the control and qubit 1 as the target.
 
-If two particles share |Φ+⟩ and you measure one as 0, the other instantly becomes 0 — regardless of distance. This cannot be used for faster-than-light communication (no-communication theorem).`,
-        body_ar: `حالات بيل الأربع لكيوبتين متشابكتين بالكامل:
+The CNOT gate ("controlled NOT") flips the target qubit only if the control qubit is 1:
+• control is 0 → the target stays 0
+• control is 1 → the target flips to 1
 
-|Φ+⟩ = (|00⟩ + |11⟩)/√2
-|Φ-⟩ = (|00⟩ - |11⟩)/√2
-|Ψ+⟩ = (|01⟩ + |10⟩)/√2
-|Ψ-⟩ = (|01⟩ - |10⟩)/√2
+So whatever qubit 0 turns out to be, qubit 1 matches it. Together they form (|00⟩ + |11⟩)/√2.
 
-إذا اشترك جسيمان في |Φ+⟩ وقِست أحدهما فوجدته 0، يصبح الآخر 0 فوراً — بغض النظر عن المسافة. لا يمكن استخدام هذا لإرسال معلومات أسرع من الضوء (مبرهنة عدم التواصل).`,
+Try it: open the Circuit Lab and click the "Bell State" example. You will see H on q[0] followed by the ⊕ symbol on q[1], which is the CNOT using q[0] as its control. Then try building the same circuit yourself on empty wires.
+
+(There are three more Bell states, which differ by a sign or a flip. You can find them later.)`,
+        body_ar: `خطوتان فقط تكفيان. ابدأ بالكيوبتين في |0⟩:
+
+1. طبّق H على الكيوبت 0 ← يصبح الكيوبت 0 مزيجاً 50/50.
+2. طبّق CNOT بحيث يكون الكيوبت 0 هو المتحكِّم والكيوبت 1 هو الهدف.
+
+بوابة CNOT ("NOT المتحكَّم بها") تقلب الكيوبت الهدف فقط إذا كان المتحكِّم يساوي 1:
+• المتحكِّم 0 ← يبقى الهدف 0
+• المتحكِّم 1 ← ينقلب الهدف إلى 1
+
+فمهما كانت نتيجة الكيوبت 0 فإن الكيوبت 1 يطابقها. معاً يكوّنان (|00⟩ + |11⟩)/√2.
+
+جرّب بنفسك: افتح مختبر الدوائر واضغط المثال "Bell State". سترى H على q[0] ثم الرمز ⊕ على q[1]، وهو CNOT يستخدم q[0] متحكِّماً. ثم حاول بناء الدائرة نفسها بنفسك على أسلاك فارغة.
+
+(هناك ثلاث حالات بيل أخرى تختلف بإشارة أو بقلب. يمكنك اكتشافها لاحقاً.)`,
         visualHint: "circuit",
       },
       {
         id: "ent-3",
-        title: "Quantum Teleportation",
-        title_ar: "الإرسال الكمومي",
-        body: `Quantum teleportation transfers a quantum state using entanglement + classical communication:
+        title: "What Entanglement Can and Can't Do",
+        title_ar: "ما يمكن للتشابك فعله وما لا يمكنه",
+        body: `What it can't do: send messages faster than light. Alice's results look completely random on their own, and so do Bob's. The link only appears when they compare their lists, and comparing needs an ordinary message (phone, internet), which is slower than light.
 
-1. Alice and Bob share a Bell pair
-2. Alice performs a Bell measurement on her unknown state |ψ⟩ and her half of the pair
-3. Alice sends 2 classical bits to Bob
-4. Bob applies corrections to his qubit
-5. Bob's qubit is now in state |ψ⟩
+What it can do:
+• Quantum teleportation: move the state of one qubit to another place using an entangled pair plus two ordinary bits. The original qubit's state is destroyed in the process, so nothing is copied and nothing travels faster than light.
+• Secure keys: entanglement can be used to share secret keys that an eavesdropper can't copy (next lesson).
+• Quantum computing: entanglement is an essential ingredient in many quantum algorithms.
 
-Note: The original state is destroyed (no-cloning theorem). Teleportation is not faster than light — it requires classical communication.`,
-        body_ar: `يُنقل الإرسال الكمومي حالة كمومية باستخدام التشابك + الاتصال الكلاسيكي:
+Warning: entanglement is fragile. Noise from the environment (decoherence) can destroy it, so keeping qubits entangled over long times and distances is a big engineering challenge.`,
+        body_ar: `ما لا يمكنه فعله: إرسال رسائل أسرع من الضوء. نتائج أليس تبدو عشوائية تماماً وحدها، وكذلك نتائج بوب. لا يظهر الرابط إلا عندما يقارنان قائمتيهما، والمقارنة تحتاج إلى رسالة عادية (هاتف، إنترنت)، وهي أبطأ من الضوء.
 
-1. تشترك أليس وبوب في زوج بيل
-2. تجري أليس قياس بيل على حالتها المجهولة |ψ⟩ ونصفها من الزوج
-3. ترسل أليس 2 بت كلاسيكي إلى بوب
-4. يطبق بوب تصحيحات على كيوبته
-5. كيوبت بوب الآن في الحالة |ψ⟩
+ما يمكنه فعله:
+• الانتقال الكمومي (Teleportation): نقل حالة كيوبت إلى مكان آخر باستخدام زوج متشابك وبتين عاديين. وتُدمَّر حالة الكيوبت الأصلي أثناء ذلك، فلا يُنسَخ شيء ولا ينتقل شيء أسرع من الضوء.
+• المفاتيح الآمنة: يمكن استخدام التشابك لتبادل مفاتيح سرية لا يستطيع المتنصت نسخها (في الدرس التالي).
+• الحوسبة الكمومية: التشابك مكوّن أساسي في كثير من الخوارزميات الكمومية.
 
-ملاحظة: تُدمَّر الحالة الأصلية (مبرهنة عدم الاستنساخ). الإرسال الكمومي ليس أسرع من الضوء — يتطلب اتصالاً كلاسيكياً.`,
+تنبيه: التشابك هشّ. فالضجيج من البيئة (فك التماسك) قد يدمّره، لذلك فإن إبقاء الكيوبتات متشابكة لفترات ومسافات طويلة تحدٍّ هندسي كبير.`,
         visualHint: "none",
       },
     ],
     faqs: [
       {
-        question: "Can entanglement be used to send information faster than light?",
-        question_ar: "هل يمكن استخدام التشابك لإرسال معلومات أسرع من الضوء؟",
-        answer: "No. While measuring one entangled particle instantly affects the other, the outcome is random — you cannot control it to encode a message. To convey the outcome, you need classical communication. This is the no-communication theorem.",
-        answer_ar: "لا. رغم أن قياس أحد الجسيمين المتشابكين يؤثر على الآخر فوراً، فإن النتيجة عشوائية — لا يمكنك التحكم فيها لتشفير رسالة. لنقل النتيجة تحتاج إلى اتصال كلاسيكي. هذه هي مبرهنة عدم التواصل.",
+        question: "Can entanglement send information faster than light?",
+        question_ar: "هل يمكن للتشابك إرسال معلومات أسرع من الضوء؟",
+        answer: "No. Each person's own results look random, and you can't choose what you will get, so you can't encode a message. The correlation is only visible after both sides compare results using an ordinary message.",
+        answer_ar: "لا. نتائج كل شخص وحده تبدو عشوائية ولا يمكنك اختيار ما ستحصل عليه، فلا تستطيع ترميز رسالة. لا تظهر الارتباطات إلا بعد أن يقارن الطرفان نتائجهما برسالة عادية.",
+      },
+      {
+        question: "Does measuring one qubit instantly change the other?",
+        question_ar: "هل يغيّر قياس أحد الكيوبتين الآخر فوراً؟",
+        answer: "Physicists agree on what is observed: the two results are perfectly correlated, and no signal is sent. How to best describe what is \"really happening\" is debated and depends on the interpretation of quantum mechanics. A safe way to say it: the two qubits share one joint state, so their results match.",
+        answer_ar: "يتفق الفيزيائيون على ما يُرصد: النتيجتان مترابطتان تماماً ولا تُرسَل أي إشارة. أما أفضل وصف لما يحدث \"فعلاً\" فمحل نقاش ويعتمد على تفسير ميكانيكا الكم. صياغة آمنة: الكيوبتان يتشاركان حالة واحدة، لذلك تتطابق نتيجتاهما.",
+      },
+      {
+        question: "How is entanglement different from the glove example?",
+        question_ar: "كيف يختلف التشابك عن مثال القفازات؟",
+        answer: "With gloves, each one was a left or a right glove all along. Bell's analysis and many experiments show that entangled qubits, measured in different ways, give correlations that no \"decided in advance\" rule can reproduce.",
+        answer_ar: "في القفازات كان كل قفاز أيسر أو أيمن طوال الوقت. أما تحليل بيل والتجارب الكثيرة فتبيّن أن الكيوبتات المتشابكة، عند قياسها بطرق مختلفة، تعطي ارتباطات لا يمكن لأي قاعدة \"محددة مسبقاً\" أن تعيد إنتاجها.",
       },
       {
         question: "Is entanglement fragile?",
-        question_ar: "هل التشابك هش؟",
-        answer: "Yes — entanglement is very fragile. Any interaction with the environment (decoherence) can destroy it. Maintaining entanglement between distant qubits is a major engineering challenge and is central to building quantum networks.",
-        answer_ar: "نعم — التشابك هش جداً. أي تفاعل مع البيئة (فك التماسك) يمكنه تدميره. الحفاظ على التشابك بين كيوبتات بعيدة يمثل تحدياً هندسياً رئيسياً وهو محور بناء الشبكات الكمومية.",
-      },
-      {
-        question: "What's the difference between entanglement and classical correlation?",
-        question_ar: "ما الفرق بين التشابك والارتباط الكلاسيكي؟",
-        answer: "Classical correlations exist before measurement (like pre-paired gloves). Quantum entanglement is different: neither particle has a definite value before measurement. The correlations are stronger than any classical hidden-variable theory allows — proven by Bell inequality violations.",
-        answer_ar: "الارتباطات الكلاسيكية موجودة قبل القياس (كالقفازات المتطابقة). التشابك الكمومي مختلف: لا يملك أيٌّ من الجسيمين قيمة محددة قبل القياس. الارتباطات أقوى مما تسمح به أي نظرية متغيرات خفية كلاسيكية — وهذا ثبت بانتهاكات متراجحات بيل.",
+        question_ar: "هل التشابك هشّ؟",
+        answer: "Yes. Any unwanted interaction with the environment can destroy it. Building quantum networks and large quantum computers means protecting entanglement, or fixing errors when it gets damaged.",
+        answer_ar: "نعم. أي تفاعل غير مرغوب فيه مع البيئة قد يدمّره. وبناء شبكات كمومية وحواسيب كمومية كبيرة يعني حماية التشابك، أو تصحيح الأخطاء عندما يتضرر.",
       },
     ],
     quiz: [
       {
-        question: "Which circuit creates a Bell state from |00⟩?",
-        question_ar: "أي دائرة تخلق حالة بيل من |00⟩؟",
-        options: ["Two X gates", "H gate on qubit 0, then CNOT", "Two CNOT gates", "A single Z gate"],
-        options_ar: ["بوابتا X", "بوابة H على الكيوبت 0 ثم CNOT", "بوابتا CNOT", "بوابة Z واحدة"],
+        question: "Which steps create a Bell pair starting from |00⟩?",
+        question_ar: "أي خطوات تنشئ زوج بيل بدءاً من |00⟩؟",
+        options: [
+          "X on qubit 0, then X on qubit 1",
+          "H on qubit 0, then CNOT from qubit 0 to qubit 1",
+          "A CNOT first, then measure both",
+          "Z on both qubits",
+        ],
+        options_ar: [
+          "X على الكيوبت 0 ثم X على الكيوبت 1",
+          "H على الكيوبت 0 ثم CNOT من الكيوبت 0 إلى الكيوبت 1",
+          "CNOT أولاً ثم قياس الاثنين",
+          "Z على الكيوبتين",
+        ],
         correctIndex: 1,
-        explanation: "Applying H to qubit 0 creates superposition, then CNOT entangles the two qubits, producing (|00⟩ + |11⟩)/√2.",
-        explanation_ar: "تطبيق H على الكيوبت 0 يخلق تراكباً، ثم CNOT يُشابك الكيوبتين، منتجاً (|00⟩ + |11⟩)/√2.",
+        explanation: "H puts qubit 0 into a 50/50 blend, then CNOT makes qubit 1 copy whatever qubit 0 is, giving (|00⟩ + |11⟩)/√2.",
+        explanation_ar: "تضع H الكيوبت 0 في مزيج 50/50، ثم تجعل CNOT الكيوبت 1 يطابق الكيوبت 0 أياً كان، فتنتج (|00⟩ + |11⟩)/√2.",
       },
       {
-        question: "What is true about entangled qubits when measured?",
-        question_ar: "ما الصحيح بشأن الكيوبتات المتشابكة عند قياسها؟",
-        options: ["They always give the same result independently", "Their outcomes are correlated in a way classical physics cannot explain", "Measuring one destroys the other", "They communicate faster than light"],
-        options_ar: ["دائماً تعطي نفس النتيجة باستقلالية", "نتائجها مترابطة بطريقة لا تستطيع الفيزياء الكلاسيكية تفسيرها", "قياس أحدهما يدمر الآخر", "تتواصل أسرع من الضوء"],
-        correctIndex: 1,
-        explanation: "Entangled qubits show correlations that violate Bell inequalities — this cannot be explained by any classical hidden-variable theory.",
-        explanation_ar: "تُظهر الكيوبتات المتشابكة ارتباطات تنتهك متراجحات بيل — لا يمكن تفسير هذا بأي نظرية متغيرات خفية كلاسيكية.",
+        question: "You measure both qubits of the Bell pair (|00⟩ + |11⟩)/√2. Which results are possible?",
+        question_ar: "تقيس كلا كيوبتي زوج بيل (|00⟩ + |11⟩)/√2. ما النتائج الممكنة؟",
+        options: [
+          "00, 01, 10 and 11, all equally likely",
+          "Only 01 and 10",
+          "Only 00",
+          "00 or 11, each about half the time",
+        ],
+        options_ar: [
+          "00 و01 و10 و11 بفرص متساوية",
+          "01 و10 فقط",
+          "00 فقط",
+          "00 أو 11، كلٌّ منهما في نحو نصف المرات",
+        ],
+        correctIndex: 3,
+        explanation: "Each qubit alone is random, but the two always match: the result is 00 or 11 with equal chance.",
+        explanation_ar: "كل كيوبت وحده عشوائي، لكن النتيجتين تتطابقان دائماً: تكون النتيجة 00 أو 11 بفرصة متساوية.",
+      },
+      {
+        question: "Why can't entanglement be used to send a message faster than light?",
+        question_ar: "لماذا لا يمكن استخدام التشابك لإرسال رسالة أسرع من الضوء؟",
+        options: [
+          "Each side's own results look random; the link only shows when results are compared by an ordinary message",
+          "The qubits are too slow",
+          "Entanglement always breaks over long distances",
+          "Nobody has built the right equipment yet",
+        ],
+        options_ar: [
+          "نتائج كل طرف وحدها تبدو عشوائية؛ ولا يظهر الرابط إلا بمقارنة النتائج عبر رسالة عادية",
+          "لأن الكيوبتات بطيئة جداً",
+          "لأن التشابك ينكسر دائماً عبر المسافات الطويلة",
+          "لأن أحداً لم يبنِ الأجهزة المناسبة بعد",
+        ],
+        correctIndex: 0,
+        explanation: "You can't control which result you get, so you can't encode a message. The correlation only becomes visible when both sides compare notes the normal way.",
+        explanation_ar: "لا يمكنك التحكم في النتيجة التي تحصل عليها، فلا يمكنك ترميز رسالة. ولا تظهر الارتباطات إلا عندما يقارن الطرفان ملاحظاتهما بالطريقة العادية.",
+      },
+      {
+        question: "What did Bell's work and the experiments that followed show?",
+        question_ar: "ماذا أظهر عمل بيل والتجارب التي تلته؟",
+        options: [
+          "Entangled particles talk to each other by radio",
+          "Entanglement does not really exist",
+          "The correlations can't be explained by results that were decided in advance, like gloves in boxes",
+          "Qubits are larger than expected",
+        ],
+        options_ar: [
+          "أن الجسيمات المتشابكة تتحدث بعضها مع بعض بالراديو",
+          "أن التشابك غير موجود فعلاً",
+          "أن الارتباطات لا يمكن تفسيرها بنتائج محددة مسبقاً، كقفازات في صناديق",
+          "أن الكيوبتات أكبر مما كان متوقعاً",
+        ],
+        correctIndex: 2,
+        explanation: "Bell tests rule out explanations where each particle carried a pre-decided answer, which is what makes entanglement different from ordinary correlation.",
+        explanation_ar: "تستبعد اختبارات بيل التفسيرات التي يحمل فيها كل جسيم إجابة محددة مسبقاً، وهذا ما يميّز التشابك عن الارتباط العادي.",
       },
     ],
   },
+
+  // ───────────────────────────── 4. CRYPTOGRAPHY ─────────────────────────────
   {
     id: "cryptography",
     title: "Cryptography",
     title_ar: "التشفير الكمومي",
-    description: "How quantum mechanics enables unbreakable encryption and threatens classical cryptographic systems.",
-    description_ar: "كيف تُتيح ميكانيكا الكم التشفير الذي لا يمكن كسره وتهدد أنظمة التشفير الكلاسيكية.",
-    topics: ["BB84 protocol", "Quantum key distribution", "Post-quantum crypto", "Shor's threat"],
-    topics_ar: ["بروتوكول BB84", "توزيع المفاتيح الكمومية", "التشفير ما بعد الكمومي", "تهديد شور"],
+    description: "How quantum computers threaten today's encryption, and two ways to defend: quantum key distribution and new math.",
+    description_ar: "كيف تهدد الحواسيب الكمومية تشفير اليوم، وطريقتان للدفاع: توزيع المفاتيح الكمومي ورياضيات جديدة.",
+    topics: ["Encryption basics", "Quantum key distribution", "Eavesdropping", "Post-quantum cryptography"],
+    topics_ar: ["أساسيات التشفير", "توزيع المفاتيح الكمومي", "التنصت", "التشفير ما بعد الكمومي"],
     difficulty: "Intermediate",
-    estimatedMinutes: 35,
+    estimatedMinutes: 25,
     dayIndex: 4,
     content: [
       {
         id: "cry-1",
-        title: "Classical vs Quantum Cryptography",
-        title_ar: "التشفير الكلاسيكي مقابل الكمومي",
-        body: `Classical cryptography (RSA, ECC) relies on mathematical hardness — factoring large numbers or discrete logarithm problems. These are hard for classical computers but vulnerable to quantum computers via Shor's algorithm.
+        title: "Secrets and Why They're at Risk",
+        title_ar: "الأسرار ولماذا هي معرّضة للخطر",
+        body: `Encryption scrambles messages so only the right person can read them. It protects messages, passwords and online payments.
 
-Quantum cryptography uses the laws of physics (rather than mathematical assumptions) to guarantee security.
+Much of today's internet security (RSA and similar systems) relies on a math problem that is easy to do in one direction and extremely hard to undo: multiplying two huge prime numbers is easy, but finding them again from the product (factoring) is not.
 
-With QKD, any eavesdropping attempt is physically detectable — it disturbs the quantum states being transmitted.`,
-        body_ar: `يعتمد التشفير الكلاسيكي (RSA، ECC) على صعوبة رياضية — تحليل أعداد كبيرة إلى عواملها أو مسائل اللوغاريتم المنفصل. هذه صعبة على الحواسيب الكلاسيكية لكنها عرضة للحواسيب الكمومية عبر خوارزمية شور.
+A large enough quantum computer running Shor's algorithm (Lesson 6) could do that factoring quickly, which would break these systems. Today's quantum computers are nowhere near that size.
 
-يستخدم التشفير الكمومي قوانين الفيزياء (بدلاً من الافتراضات الرياضية) لضمان الأمان.
+Why worry now? Someone could record encrypted data today and decrypt it years later, once the technology exists ("harvest now, decrypt later"). So secrets that must stay secret for many years need protection early.
 
-مع QKD، أي محاولة تنصت قابلة للكشف فيزيائياً — فهي تُخلّ بالحالات الكمومية المُرسَلة.`,
+There are two main answers: use quantum physics to share keys safely (this lesson, part 2), or use new kinds of math that quantum computers are not known to break (part 3).`,
+        body_ar: `يشوّش التشفير الرسائل بحيث لا يستطيع قراءتها إلا الشخص المقصود. وهو يحمي الرسائل وكلمات المرور والمدفوعات عبر الإنترنت.
+
+يعتمد جزء كبير من أمن الإنترنت اليوم (نظام RSA وما يشبهه) على مسألة رياضية سهلة في اتجاه وصعبة جداً في الاتجاه المعاكس: ضرب عددين أوليين ضخمين سهل، لكن استرجاعهما من حاصل الضرب (التحليل إلى عوامل) ليس كذلك.
+
+حاسوب كمومي كبير بما يكفي يشغّل خوارزمية شور (الدرس 6) يمكنه إجراء هذا التحليل بسرعة، مما يكسر هذه الأنظمة. والحواسيب الكمومية اليوم بعيدة جداً عن هذا الحجم.
+
+لماذا القلق الآن؟ يمكن لأحدهم تسجيل بيانات مشفّرة اليوم وفكّ تشفيرها بعد سنوات حين تتوفر التقنية ("اجمع الآن وفكّ التشفير لاحقاً"). لذلك تحتاج الأسرار التي يجب أن تبقى سرية سنوات طويلة إلى حماية مبكرة.
+
+هناك إجابتان رئيسيتان: استخدام فيزياء الكم لتبادل المفاتيح بأمان (الجزء 2 من هذا الدرس)، أو استخدام أنواع جديدة من الرياضيات لا يُعرف أن الحواسيب الكمومية تكسرها (الجزء 3).`,
         visualHint: "none",
       },
       {
         id: "cry-2",
-        title: "BB84 Protocol",
-        title_ar: "بروتوكول BB84",
-        body: `BB84 (Bennett & Brassard, 1984) is the first and most famous QKD protocol:
+        title: "Quantum Key Distribution (BB84, simplified)",
+        title_ar: "توزيع المفاتيح الكمومي (BB84 مبسّطاً)",
+        body: `Alice and Bob want a shared secret key (a random string of bits). BB84, invented by Bennett and Brassard in 1984, does it by sending single qubits.
 
-1. Alice sends qubits in random bases (+/×) and random states
-2. Bob measures in random bases
-3. Alice and Bob publicly compare which bases they used
-4. They keep only bits where they used matching bases → secret key
-5. They sacrifice some bits to check for eavesdropping
+The idea in plain steps:
+1. Alice picks a random bit and a random way of preparing the qubit (call the two ways "+" and "×"), then sends the qubit.
+2. Bob measures each qubit with a randomly chosen way, "+" or "×".
+3. If Bob guessed the same way as Alice, he gets her bit. If he guessed differently, his result is random.
+4. Alice and Bob announce publicly which way each one used, but not the bits. They keep only the positions where the ways matched. Those bits are the key.
 
-If an eavesdropper intercepts, she must measure qubits (disturbing them) then re-send. This introduces errors Alice and Bob can detect.
+What about a spy, Eve? She has to measure each qubit to learn the bit, and she has to guess the way too. When she guesses wrong (half the time), she disturbs the qubit, and some of Bob's bits will no longer match Alice's. On average about 1 in 4 of the bits they compare will disagree.
 
-Security is guaranteed by the no-cloning theorem.`,
-        body_ar: `BB84 (بينيت وبراسار، 1984) هو أول بروتوكول QKD وأشهره:
+Alice and Bob compare a small sample of the key. If there are too many mismatches, they throw the key away. Eve can't just copy a qubit and send the original on, because quantum states can't be copied perfectly (the no-cloning theorem).`,
+        body_ar: `تريد أليس وبوب مفتاحاً سرياً مشتركاً (سلسلة عشوائية من البتات). وبروتوكول BB84 الذي ابتكره بينيت وبراسار عام 1984 يفعل ذلك بإرسال كيوبتات مفردة.
 
-1. ترسل أليس كيوبتات في أسس عشوائية (+/×) وحالات عشوائية
-2. يقيس بوب في أسس عشوائية
-3. تقارن أليس وبوب علناً الأسس المستخدمة
-4. يحتفظان فقط بالبتات التي استخدما فيها أسساً متطابقة ← مفتاح سري
-5. يُضحيان ببعض البتات للتحقق من وجود تنصت
+الفكرة بخطوات بسيطة:
+1. تختار أليس بتاً عشوائياً وطريقة عشوائية لتحضير الكيوبت (نسمّي الطريقتين "+" و"×") ثم ترسل الكيوبت.
+2. يقيس بوب كل كيوبت بطريقة يختارها عشوائياً: "+" أو "×".
+3. إذا خمّن بوب الطريقة نفسها التي استخدمتها أليس فإنه يحصل على بتّها. وإذا خمّن طريقة مختلفة تكون نتيجته عشوائية.
+4. يعلن أليس وبوب علناً الطريقة التي استخدمها كل منهما لكل كيوبت، لكن دون البتات. ويحتفظان فقط بالمواضع التي تطابقت فيها الطريقتان. هذه البتات هي المفتاح.
 
-إذا تدخل متنصت، يجب عليه قياس الكيوبتات (فيُخلّ بها) ثم إعادة إرسالها. هذا يُدخل أخطاء تستطيع أليس وبوب اكتشافها.
+وماذا عن جاسوس اسمه إيف؟ عليها أن تقيس كل كيوبت لتعرف البت، وعليها أن تخمّن الطريقة أيضاً. وعندما تخمّن خطأ (في نصف المرات) فإنها تزعج الكيوبت، فلا تعود بعض بتات بوب مطابقة لبتات أليس. وسطياً تختلف نحو 1 من كل 4 بتات يقارنانها.
 
-الأمان مضمون بمبرهنة عدم الاستنساخ.`,
+يقارن أليس وبوب عينة صغيرة من المفتاح. فإذا كان عدد الأخطاء كبيراً يتخلصان من المفتاح. ولا تستطيع إيف ببساطة نسخ الكيوبت وإرسال الأصلي، لأن الحالات الكمومية لا يمكن نسخها بشكل مثالي (مبرهنة عدم الاستنساخ).`,
         visualHint: "none",
       },
       {
         id: "cry-3",
         title: "Post-Quantum Cryptography",
         title_ar: "التشفير ما بعد الكمومي",
-        body: `Shor's algorithm can break RSA and ECC on a powerful enough quantum computer. NIST finalized post-quantum standards in 2024:
+        body: `Post-quantum cryptography (PQC) means new encryption methods that run on normal computers but are built on math problems that quantum computers are not known to solve quickly. No special quantum hardware is needed, so it can be rolled out on the internet we already have.
 
-• CRYSTALS-Kyber (key encapsulation)
-• CRYSTALS-Dilithium (digital signatures)
-• FALCON (signatures)
+In August 2024 the US standards institute NIST published its first post-quantum standards:
+• ML-KEM (based on Kyber) for sharing keys
+• ML-DSA (based on Dilithium) and SLH-DSA (based on SPHINCS+) for digital signatures
 
-These classical algorithms are based on mathematical problems believed hard for both classical and quantum computers (e.g., lattice problems).
+More are on the way. Many organizations and some web browsers have already started switching, because of the "harvest now, decrypt later" risk.
 
-Organizations should begin migrating to post-quantum algorithms now — especially for long-lived secrets.`,
-        body_ar: `يمكن لخوارزمية شور كسر RSA وECC على حاسوب كمومي قوي بما يكفي. أنجز NIST معايير ما بعد الكمومي في 2024:
+Which is better, QKD or PQC? Quantum key distribution needs special hardware and has limited distance, so several national security agencies recommend PQC for everyday use. QKD is mostly used in research and special-purpose networks.`,
+        body_ar: `التشفير ما بعد الكمومي (PQC) يعني طرق تشفير جديدة تعمل على حواسيب عادية لكنها مبنية على مسائل رياضية لا يُعرف أن الحواسيب الكمومية تحلّها بسرعة. ولا تحتاج إلى أجهزة كمومية خاصة، لذلك يمكن نشرها على الإنترنت الموجود أصلاً.
 
-• CRYSTALS-Kyber (تغليف المفاتيح)
-• CRYSTALS-Dilithium (التوقيعات الرقمية)
-• FALCON (التوقيعات)
+في أغسطس 2024 نشر المعهد الأمريكي للمعايير NIST أولى معاييره ما بعد الكمومية:
+• ML-KEM (المبني على Kyber) لتبادل المفاتيح
+• ML-DSA (المبني على Dilithium) وSLH-DSA (المبني على SPHINCS+) للتوقيعات الرقمية
 
-هذه خوارزميات كلاسيكية مبنية على مسائل رياضية يُعتقد أنها صعبة على الحواسيب الكلاسيكية والكمومية معاً (مثل مسائل الشبكة الرياضية).
+وهناك معايير أخرى في الطريق. وقد بدأت جهات كثيرة وبعض المتصفحات بالانتقال فعلاً بسبب خطر "اجمع الآن وفكّ التشفير لاحقاً".
 
-يجب على المؤسسات البدء بالانتقال إلى خوارزميات ما بعد الكمومي الآن — خاصة للأسرار طويلة الأمد.`,
+أيهما أفضل، QKD أم PQC؟ يحتاج توزيع المفاتيح الكمومي إلى أجهزة خاصة ومداه محدود، لذلك توصي عدة جهات أمن وطنية باستخدام PQC في الاستخدام اليومي. ويُستخدم QKD غالباً في الأبحاث والشبكات ذات الأغراض الخاصة.`,
         visualHint: "none",
       },
     ],
     faqs: [
       {
-        question: "Is QKD being used today?",
-        question_ar: "هل يُستخدم QKD اليوم؟",
-        answer: "Yes — QKD systems exist commercially (Toshiba, ID Quantique, QuantumCTek). China operates a 2,000 km quantum backbone network. However, QKD has practical limitations: distance constraints, high cost, and requires dedicated hardware.",
-        answer_ar: "نعم — أنظمة QKD موجودة تجارياً (توشيبا، ID Quantique، QuantumCTek). تشغّل الصين شبكة عمود فقري كمومية بطول 2,000 كم. لكن QKD له قيود عملية: قيود المسافة، التكلفة العالية، ويتطلب أجهزة متخصصة.",
+        question: "Is quantum key distribution used in the real world?",
+        question_ar: "هل يُستخدم توزيع المفاتيح الكمومي في العالم الحقيقي؟",
+        answer: "Yes, in pilot projects and some government and bank networks, including long fiber links and satellite experiments. But it needs special hardware, has distance limits and is expensive, so it is not used for ordinary internet traffic.",
+        answer_ar: "نعم، في مشاريع تجريبية وبعض شبكات الحكومات والبنوك، بما فيها وصلات ألياف طويلة وتجارب بالأقمار الصناعية. لكنه يحتاج إلى أجهزة خاصة ومداه محدود وكلفته عالية، لذلك لا يُستخدم لحركة الإنترنت العادية.",
       },
       {
         question: "When will quantum computers break RSA?",
         question_ar: "متى ستكسر الحواسيب الكمومية تشفير RSA؟",
-        answer: "Current estimates suggest a quantum computer capable of breaking 2048-bit RSA would need millions of fault-tolerant qubits. Most experts estimate 10-20 years. Organizations handling long-lived secrets should be migrating to post-quantum cryptography now.",
-        answer_ar: "تشير التقديرات الحالية إلى أن حاسوباً كمومياً قادراً على كسر RSA ذي 2048 بت سيحتاج ملايين الكيوبتات المتحملة للأخطاء. يُقدّر معظم الخبراء ذلك بـ 10-20 سنة. يجب على المؤسسات التي تتعامل مع أسرار طويلة الأمد الانتقال الآن.",
+        answer: "Nobody knows. It would take far larger and more reliable machines than we have today. Recent research estimates that breaking 2048-bit RSA might need under a million noisy qubits running for about a week, which is still far beyond current hardware. Estimates keep changing, which is exactly why preparing early is recommended.",
+        answer_ar: "لا أحد يعرف. سيحتاج الأمر إلى آلات أكبر بكثير وأكثر موثوقية مما لدينا اليوم. تقدّر أبحاث حديثة أن كسر RSA بطول 2048 بت قد يحتاج إلى أقل من مليون كيوبت مشوِّش تعمل نحو أسبوع، وهذا ما يزال أبعد بكثير من العتاد الحالي. والتقديرات تتغير باستمرار، ولهذا يُنصح بالاستعداد مبكراً.",
       },
       {
-        question: "What is 'harvest now, decrypt later'?",
-        question_ar: "ما المقصود بـ 'اجمع الآن وفكّ التشفير لاحقاً'؟",
-        answer: "Adversaries may collect encrypted data today, store it, and decrypt it once quantum computers are powerful enough. If today's secrets need to remain secret for 10+ years, they're already at risk.",
-        answer_ar: "قد يجمع الخصوم البيانات المشفرة اليوم ويخزنونها، ويفكون تشفيرها حالما تصبح الحواسيب الكمومية قوية بما يكفي. إذا كانت الأسرار الحالية بحاجة للبقاء سرية لأكثر من 10 سنوات، فهي معرضة للخطر بالفعل.",
+        question: "What does \"harvest now, decrypt later\" mean?",
+        question_ar: "ما معنى \"اجمع الآن وفكّ التشفير لاحقاً\"؟",
+        answer: "An attacker saves encrypted traffic today, even though they can't read it yet, and decrypts it years later with a future quantum computer. If your data must stay secret for 10+ years, it is already at risk.",
+        answer_ar: "يحفظ المهاجم اليوم حركة بيانات مشفّرة رغم أنه لا يستطيع قراءتها الآن، ثم يفكّ تشفيرها بعد سنوات بحاسوب كمومي مستقبلي. فإذا كان لا بد أن تبقى بياناتك سرية أكثر من 10 سنوات فهي معرّضة للخطر الآن.",
+      },
+      {
+        question: "Does quantum cryptography mean \"unbreakable\"?",
+        question_ar: "هل يعني التشفير الكمومي أنه \"لا يمكن كسره\"؟",
+        answer: "The protocol is secure in theory. Real devices can have flaws, such as imperfect detectors or lasers, and attackers have exploited such flaws in lab demonstrations. Security always depends on the implementation, not just the idea.",
+        answer_ar: "البروتوكول آمن من الناحية النظرية. أما الأجهزة الحقيقية فقد يكون فيها عيوب، كأجهزة كشف أو ليزرات غير مثالية، وقد استغل مهاجمون عيوباً كهذه في عروض مخبرية. الأمن يعتمد دائماً على التنفيذ لا على الفكرة وحدها.",
       },
     ],
     quiz: [
       {
-        question: "What guarantees the security of QKD?",
-        question_ar: "ما الذي يضمن أمان QKD؟",
-        options: ["Strong mathematical assumptions", "The no-cloning theorem and quantum measurement disturbance", "Encryption key length", "The speed of quantum computers"],
-        options_ar: ["افتراضات رياضية قوية", "مبرهنة عدم الاستنساخ واضطراب القياس الكمومي", "طول مفتاح التشفير", "سرعة الحواسيب الكمومية"],
-        correctIndex: 1,
-        explanation: "QKD security is guaranteed by physical laws: the no-cloning theorem and the fact that measurement disturbs quantum states, making eavesdropping detectable.",
-        explanation_ar: "أمان QKD مضمون بقوانين الفيزياء: مبرهنة عدم الاستنساخ وحقيقة أن القياس يُخلّ بالحالات الكمومية، مما يجعل التنصت قابلاً للكشف.",
+        question: "What could a large quantum computer running Shor's algorithm threaten?",
+        question_ar: "ماذا يمكن أن يهدد حاسوب كمومي كبير يشغّل خوارزمية شور؟",
+        options: [
+          "Wi-Fi speeds",
+          "Video quality",
+          "Encryption such as RSA that relies on factoring",
+          "Battery life",
+        ],
+        options_ar: [
+          "سرعة الواي فاي",
+          "جودة الفيديو",
+          "تشفيراً مثل RSA يعتمد على تحليل الأعداد",
+          "عمر البطارية",
+        ],
+        correctIndex: 2,
+        explanation: "Shor's algorithm can factor large numbers efficiently, which would break encryption based on the difficulty of factoring.",
+        explanation_ar: "تستطيع خوارزمية شور تحليل الأعداد الكبيرة بكفاءة، مما يكسر التشفير المعتمد على صعوبة التحليل.",
       },
       {
-        question: "Which algorithm threatens RSA encryption?",
-        question_ar: "أي خوارزمية تهدد تشفير RSA؟",
-        options: ["Grover's algorithm", "Deutsch-Jozsa algorithm", "Shor's algorithm", "BB84 protocol"],
-        options_ar: ["خوارزمية غروفر", "خوارزمية دويتش-يوزسا", "خوارزمية شور", "بروتوكول BB84"],
-        correctIndex: 2,
-        explanation: "Shor's algorithm can factor large integers in polynomial time, which would break RSA and other factoring-based cryptosystems.",
-        explanation_ar: "يمكن لخوارزمية شور تحليل الأعداد الصحيحة الكبيرة في وقت متعدد الحدود، مما سيكسر RSA وأنظمة التشفير الأخرى القائمة على التحليل.",
+        question: "In BB84, why do Alice and Bob announce their measurement ways publicly?",
+        question_ar: "في BB84، لماذا يعلن أليس وبوب طرق القياس علناً؟",
+        options: [
+          "To decide which positions to keep: only the matching ones become the key",
+          "To tell Eve how to listen",
+          "To reveal the key to everyone",
+          "To make the process faster",
+        ],
+        options_ar: [
+          "لتحديد المواضع التي يحتفظان بها: المتطابقة فقط تصبح المفتاح",
+          "ليخبرا إيف كيف تتنصت",
+          "ليكشفا المفتاح للجميع",
+          "لتسريع العملية",
+        ],
+        correctIndex: 0,
+        explanation: "They only reveal which way each of them used, not the bits. Positions with matching ways give identical bits, and those bits form the secret key.",
+        explanation_ar: "يعلنان فقط الطريقة التي استخدمها كل منهما، وليس البتات. المواضع ذات الطريقتين المتطابقتين تعطي بتات متطابقة، وهذه البتات تكوّن المفتاح السري.",
+      },
+      {
+        question: "If an eavesdropper measures the qubits on the way, what do Alice and Bob notice?",
+        question_ar: "إذا قاس متنصت الكيوبتات في الطريق، ماذا يلاحظ أليس وبوب؟",
+        options: [
+          "Nothing at all",
+          "The connection gets slower",
+          "The qubits multiply",
+          "More mismatches when they compare part of their key",
+        ],
+        options_ar: [
+          "لا شيء إطلاقاً",
+          "يصبح الاتصال أبطأ",
+          "تتضاعف الكيوبتات",
+          "عدداً أكبر من الاختلافات عند مقارنة جزء من مفتاحهما",
+        ],
+        correctIndex: 3,
+        explanation: "Measuring disturbs the qubits, so some of Bob's bits no longer match Alice's. A high mismatch rate in the comparison reveals the spy.",
+        explanation_ar: "القياس يزعج الكيوبتات، فلا تعود بعض بتات بوب مطابقة لبتات أليس. ونسبة الاختلاف العالية في المقارنة تكشف الجاسوس.",
+      },
+      {
+        question: "What is post-quantum cryptography?",
+        question_ar: "ما هو التشفير ما بعد الكمومي؟",
+        options: [
+          "Encryption that runs only on quantum computers",
+          "New methods for normal computers designed to resist attacks from both normal and quantum computers",
+          "Cryptography that uses only entanglement",
+          "Encryption that stopped being used in 2024",
+        ],
+        options_ar: [
+          "تشفير يعمل على الحواسيب الكمومية فقط",
+          "طرق جديدة للحواسيب العادية مصمَّمة لتقاوم هجمات الحواسيب العادية والكمومية معاً",
+          "تشفير يستخدم التشابك فقط",
+          "تشفير توقف استخدامه عام 2024",
+        ],
+        correctIndex: 1,
+        explanation: "PQC runs on ordinary hardware and is based on math problems that quantum computers are not known to solve quickly.",
+        explanation_ar: "يعمل PQC على عتاد عادي ويعتمد على مسائل رياضية لا يُعرف أن الحواسيب الكمومية تحلّها بسرعة.",
       },
     ],
   },
+
+  // ─────────────────────── 5. BIOCHEMISTRY & SIMULATION ───────────────────────
   {
     id: "biochemistry",
     title: "Biochemistry & Simulation",
     title_ar: "الكيمياء الحيوية والمحاكاة",
-    description: "How quantum computers could revolutionise drug discovery, protein folding, and materials science.",
-    description_ar: "كيف يمكن للحواسيب الكمومية أن تُحدث ثورة في اكتشاف الأدوية وطيّ البروتينات وعلوم المواد.",
-    topics: ["Molecular simulation", "Drug discovery", "Energy calculations", "VQE algorithm"],
-    topics_ar: ["محاكاة الجزيئات", "اكتشاف الأدوية", "حسابات الطاقة", "خوارزمية VQE"],
-    difficulty: "Advanced",
-    estimatedMinutes: 40,
+    description: "Why molecules are hard for normal computers to simulate, and how quantum computers might help chemistry and medicine one day.",
+    description_ar: "لماذا يصعب على الحواسيب العادية محاكاة الجزيئات، وكيف قد تساعد الحواسيب الكمومية الكيمياء والطب يوماً ما.",
+    topics: ["Molecules are quantum", "Drug discovery", "Catalysts", "Quantum + classical teamwork"],
+    topics_ar: ["الجزيئات كمومية", "اكتشاف الأدوية", "المحفزات", "تعاون الكمومي والكلاسيكي"],
+    difficulty: "Beginner",
+    estimatedMinutes: 20,
     dayIndex: 5,
     content: [
       {
         id: "bio-1",
-        title: "Why Quantum for Chemistry?",
-        title_ar: "لماذا الكم للكيمياء؟",
-        body: `Molecules are fundamentally quantum systems. Their electronic structure follows quantum mechanics, but classical computers struggle to simulate this exactly — the number of quantum states grows exponentially with molecule size.
+        title: "Why Are Molecules Hard to Simulate?",
+        title_ar: "لماذا يصعب محاكاة الجزيئات؟",
+        body: `Everything in chemistry comes from how electrons behave inside atoms and molecules, and electrons follow the rules of quantum physics.
 
-Simulating caffeine (C₈H₁₀N₄O₂) exactly would require ~10⁴⁸ classical bits — more than atoms in Earth. A quantum computer with ~180 qubits could simulate it exactly.
+To predict what a molecule will do (Will a drug stick to a protein? How does an enzyme work?), a computer has to keep track of the quantum state of all its electrons together.
 
-This is Feynman's original vision for quantum computers (1981): 'Nature isn't classical, dammit, and if you want to make a simulation of nature, you'd better make it quantum mechanical.'`,
-        body_ar: `الجزيئات هي أنظمة كمومية بطبيعتها. بنيتها الإلكترونية تتبع ميكانيكا الكم، لكن الحواسيب الكلاسيكية تعجز عن محاكاتها بدقة — عدد الحالات الكمومية ينمو بشكل أسي مع حجم الجزيء.
+That is the same problem you met in Lesson 2: the number of amplitudes doubles with each extra qubit's worth of state. Even a small molecule like caffeine has on the order of 10⁴⁸ possible states, far too many numbers to store exactly, even on the biggest supercomputer.
 
-محاكاة الكافيين (C₈H₁₀N₄O₂) بدقة تستلزم ~10⁴⁸ بت كلاسيكي — أكثر من ذرات الأرض. حاسوب كمومي بـ ~180 كيوبت يمكنه محاكاته بدقة تامة.
+Chemists use clever approximations, and they work well for many molecules. But for some, such as certain catalysts, the approximations are not accurate enough.
 
-هذه كانت رؤية فاينمان الأصلية للحواسيب الكمومية (1981): 'الطبيعة ليست كلاسيكية، للعنة، وإذا أردت محاكاة الطبيعة، فالأفضل أن تجعل محاكاتك كمومية.'`,
+In 1981 the physicist Richard Feynman suggested a different idea: since nature is quantum, build a computer out of quantum parts to simulate it. This was one of the first ideas for quantum computers.`,
+        body_ar: `كل شيء في الكيمياء ينشأ من سلوك الإلكترونات داخل الذرات والجزيئات، والإلكترونات تتبع قواعد فيزياء الكم.
+
+للتنبؤ بما سيفعله جزيء (هل سيلتصق الدواء ببروتين؟ كيف يعمل إنزيم؟) يجب على الحاسوب تتبّع الحالة الكمومية لجميع إلكتروناته معاً.
+
+وهذه هي المشكلة نفسها التي رأيتها في الدرس 2: يتضاعف عدد السعات مع كل كيوبت إضافي من الحالة. وحتى جزيء صغير كالكافيين له ما يقارب 10⁴⁸ حالة ممكنة، وهي أعداد كثيرة جداً لا يمكن تخزينها بدقة حتى على أكبر حاسوب فائق.
+
+يستخدم الكيميائيون تقريبات ذكية تنجح مع جزيئات كثيرة. لكنها في بعضها، كبعض المحفزات، لا تكون دقيقة بما يكفي.
+
+وفي عام 1981 اقترح الفيزيائي ريتشارد فاينمان فكرة مختلفة: بما أن الطبيعة كمومية، فلنبنِ حاسوباً من أجزاء كمومية لمحاكاتها. كانت هذه من أولى أفكار الحواسيب الكمومية.`,
         visualHint: "none",
       },
       {
         id: "bio-2",
-        title: "Drug Discovery Applications",
-        title_ar: "تطبيقات اكتشاف الأدوية",
-        body: `Quantum simulation applications in biochemistry:
+        title: "What Could Quantum Computers Help With?",
+        title_ar: "فيمَ يمكن أن تساعد الحواسيب الكمومية؟",
+        body: `Researchers hope accurate quantum simulation could help with:
 
-• Protein folding: Understand how proteins fold to design drugs that target specific shapes
-• Enzyme catalysis: Model how enzymes work to design better biocatalysts
-• Drug-receptor binding: Calculate binding energies of drug candidates more accurately
-• Nitrogen fixation: Design better catalysts for fertilizer production (Haber-Bosch uses 2% of world's energy)
+• Drug discovery: predicting how strongly a candidate drug sticks to its target in the body, before spending years testing it in a lab.
+• Catalysts and enzymes: designing better catalysts. For example, making fertilizer from nitrogen in the air (the Haber–Bosch process) uses around 1–2% of the world's energy, and a better catalyst could save a lot of it.
+• Batteries and materials: understanding what happens inside new battery materials or solar cells.
 
-Near-term milestone: Accurately simulating the FeMo-cofactor of nitrogenase enzyme — a molecule too complex for classical computers.`,
-        body_ar: `تطبيقات المحاكاة الكمومية في الكيمياء الحيوية:
+Be realistic: these are goals, not results yet. Researchers run small experiments on quantum computers, but as of today they have not beaten the best classical methods on a chemistry problem that really matters. Check recent news for updates, because this field moves quickly.`,
+        body_ar: `يأمل الباحثون أن تساعد المحاكاة الكمومية الدقيقة في:
 
-• طيّ البروتينات: فهم كيفية طيّ البروتينات لتصميم أدوية تستهدف أشكالاً محددة
-• التحفيز الإنزيمي: نمذجة عمل الإنزيمات لتصميم محفزات حيوية أفضل
-• ارتباط الدواء بالمستقبل: حساب طاقات الارتباط لمرشحي الأدوية بدقة أعلى
-• تثبيت النيتروجين: تصميم محفزات أفضل لإنتاج الأسمدة (عملية هابر-بوش تستهلك 2% من طاقة العالم)
+• اكتشاف الأدوية: التنبؤ بمدى التصاق دواء مرشَّح بهدفه في الجسم، قبل إنفاق سنوات في اختباره بالمختبر.
+• المحفزات والإنزيمات: تصميم محفزات أفضل. فمثلاً إنتاج السماد من نيتروجين الهواء (عملية هابر–بوش) يستهلك نحو 1–2% من طاقة العالم، ومحفز أفضل قد يوفر الكثير منها.
+• البطاريات والمواد: فهم ما يحدث داخل مواد البطاريات والخلايا الشمسية الجديدة.
 
-الهدف القريب: محاكاة دقيقة لعامل FeMo المساعد لإنزيم النيتروجيناز — جزيء أعقد مما تستطيع الحواسيب الكلاسيكية التعامل معه.`,
+كن واقعياً: هذه أهداف وليست نتائج بعد. يجري الباحثون تجارب صغيرة على الحواسيب الكمومية، لكنها حتى اليوم لم تتفوق على أفضل الطرق الكلاسيكية في مسألة كيميائية ذات أهمية حقيقية. تابع الأخبار الحديثة، فهذا المجال يتطور بسرعة.`,
         visualHint: "none",
       },
       {
         id: "bio-3",
-        title: "The VQE Algorithm",
-        title_ar: "خوارزمية VQE",
-        body: `The Variational Quantum Eigensolver (VQE) is a near-term algorithm for quantum chemistry:
+        title: "How Would It Work? A Team Effort",
+        title_ar: "كيف سيعمل؟ جهد مشترك",
+        body: `Near-term quantum computers are small and noisy, so researchers use a team approach with a quantum computer and a normal computer working together.
 
-1. Prepare a parameterized quantum state |ψ(θ)⟩ on a quantum computer
-2. Measure the expectation value ⟨E⟩ = ⟨ψ(θ)|H|ψ(θ)⟩
-3. Use a classical optimizer to find parameters θ that minimize ⟨E⟩
-4. By the variational principle, the minimum energy ≥ true ground state energy
+The idea, in simple steps:
+1. The quantum computer prepares a guess for the molecule's state and measures its energy.
+2. A normal computer reads the result and slightly adjusts the settings of the quantum circuit.
+3. Repeat many times. Nature prefers low energy (like a ball rolling to the bottom of a valley), so the best guess is the one with the lowest energy.
 
-VQE can run on today's noisy quantum computers and is being tested by IBM, Google, and others for small molecules. It's a 'quantum-classical hybrid' algorithm.`,
-        body_ar: `محلّل القيم الذاتية التغيّري الكمومي (VQE) هو خوارزمية قريبة المدى للكيمياء الكمومية:
+This is like tuning a guitar: play a note, listen, adjust, repeat. The method is called the Variational Quantum Eigensolver (VQE), but you don't need to remember the name.
 
-1. تحضير حالة كمومية ذات معاملات |ψ(θ)⟩ على حاسوب كمومي
-2. قياس القيمة المتوقعة ⟨E⟩ = ⟨ψ(θ)|H|ψ(θ)⟩
-3. استخدام محسّن كلاسيكي لإيجاد معاملات θ تُصغّر ⟨E⟩
-4. بمبدأ التغيّر، الطاقة الدنيا ≥ طاقة الحالة الأرضية الحقيقية
+Because of noise, today's experiments are limited to very small molecules such as hydrogen (H₂). Simulating large, important molecules will need much bigger machines that correct their own errors.`,
+        body_ar: `الحواسيب الكمومية القريبة المدى صغيرة ومشوِّشة، لذلك يستخدم الباحثون نهج الفريق: حاسوب كمومي وحاسوب عادي يعملان معاً.
 
-يمكن تشغيل VQE على الحواسيب الكمومية الحالية الصاخبة وتختبره IBM وGoogle وغيرهما للجزيئات الصغيرة. إنها خوارزمية 'هجينة كمومية-كلاسيكية'.`,
+الفكرة بخطوات بسيطة:
+1. يحضّر الحاسوب الكمومي تخميناً لحالة الجزيء ويقيس طاقته.
+2. يقرأ حاسوب عادي النتيجة ويعدّل قليلاً إعدادات الدائرة الكمومية.
+3. تُكرَّر العملية مرات كثيرة. الطبيعة تفضّل الطاقة المنخفضة (كالكرة التي تتدحرج إلى قاع وادٍ)، فأفضل تخمين هو الذي له أقل طاقة.
+
+هذا يشبه ضبط أوتار الغيتار: اعزف نغمة، واستمع، وعدّل، وكرّر. تُسمّى الطريقة المحلّل الكمومي التغيّري للقيم الذاتية (VQE)، لكن لا يلزمك حفظ الاسم.
+
+وبسبب الضجيج تقتصر تجارب اليوم على جزيئات صغيرة جداً مثل الهيدروجين (H₂). أما محاكاة الجزيئات الكبيرة المهمة فتحتاج إلى آلات أكبر بكثير تصحّح أخطاءها بنفسها.`,
         visualHint: "none",
       },
     ],
     faqs: [
       {
-        question: "Has a quantum computer discovered any drugs yet?",
-        question_ar: "هل اكتشف حاسوب كمومي أي أدوية حتى الآن؟",
-        answer: "Not yet — current quantum computers are still too small and noisy for practical drug discovery. However, companies like IBM, Google, Roche, and Pfizer are actively researching this. The first meaningful results on useful molecules are expected in the next 5-10 years.",
-        answer_ar: "ليس بعد — الحواسيب الكمومية الحالية لا تزال صغيرة وصاخبة جداً لاكتشاف الأدوية العملي. لكن شركات مثل IBM وGoogle وRoche وPfizer تبحث في هذا بنشاط. من المتوقع أولى النتائج المجدية على الجزيئات المفيدة خلال 5-10 سنوات.",
+        question: "Has a quantum computer discovered a new drug yet?",
+        question_ar: "هل اكتشف حاسوب كمومي دواءً جديداً حتى الآن؟",
+        answer: "No. Quantum computers are still too small and noisy for real drug discovery. Companies and universities are experimenting, mainly to be ready when the hardware improves.",
+        answer_ar: "لا. ما تزال الحواسيب الكمومية صغيرة ومشوِّشة جداً لاكتشاف الأدوية فعلياً. تجري الشركات والجامعات تجارب بشكل رئيسي لتكون جاهزة حين يتحسن العتاد.",
       },
       {
-        question: "What is the 'quantum advantage' crossover for chemistry?",
-        question_ar: "ما نقطة تعادل 'الميزة الكمومية' للكيمياء؟",
-        answer: "Quantum advantage in chemistry means using a quantum computer to solve a chemical problem that no classical computer can solve in reasonable time. Current estimates suggest this will require fault-tolerant quantum computers with ~100,000-1,000,000 physical qubits — likely 15-20 years away.",
-        answer_ar: "الميزة الكمومية في الكيمياء تعني استخدام حاسوب كمومي لحل مسألة كيميائية لا يستطيع أي حاسوب كلاسيكي حلها في وقت معقول. تشير التقديرات الحالية إلى أن هذا سيتطلب حواسيب كمومية متحملة للأخطاء بـ ~100,000-1,000,000 كيوبت فيزيائي — على الأرجح بعد 15-20 سنة.",
+        question: "Why not just use normal supercomputers?",
+        question_ar: "لماذا لا نستخدم الحواسيب الفائقة العادية فقط؟",
+        answer: "Scientists do, and they get excellent results with approximations (including AI methods). Quantum computers are only expected to help in the hard cases where those approximations break down.",
+        answer_ar: "يفعل العلماء ذلك، ويحصلون على نتائج ممتازة بالتقريبات (ومنها طرق الذكاء الاصطناعي). ويُتوقع أن تفيد الحواسيب الكمومية فقط في الحالات الصعبة التي تفشل فيها تلك التقريبات.",
+      },
+      {
+        question: "How long until quantum computers are useful for chemistry?",
+        question_ar: "كم سيستغرق الأمر حتى تفيد الحواسيب الكمومية الكيمياء؟",
+        answer: "Nobody can say for sure. Many experts think it needs error-corrected machines much larger than today's, which could take a decade or more. Progress in hardware and in smarter algorithms may shorten that.",
+        answer_ar: "لا أحد يستطيع الجزم. يرى كثير من الخبراء أن الأمر يحتاج إلى آلات تصحّح أخطاءها وأكبر بكثير من اليوم، وقد يستغرق ذلك عقداً أو أكثر. وقد يختصر التقدم في العتاد وفي الخوارزميات الأذكى هذه المدة.",
       },
     ],
     quiz: [
       {
-        question: "Why is quantum computing well-suited for molecular simulation?",
-        question_ar: "لماذا الحوسبة الكمومية مناسبة لمحاكاة الجزيئات؟",
-        options: ["Molecules are digital systems", "Molecules are quantum systems and quantum computers naturally represent quantum states", "Quantum computers are faster for all computations", "Molecules are too small for classical computers to see"],
-        options_ar: ["الجزيئات أنظمة رقمية", "الجزيئات أنظمة كمومية والحواسيب الكمومية تمثل الحالات الكمومية بشكل طبيعي", "الحواسيب الكمومية أسرع لجميع الحسابات", "الجزيئات أصغر من أن ترصدها الحواسيب الكلاسيكية"],
-        correctIndex: 1,
-        explanation: "Molecules obey quantum mechanics. A quantum computer can represent molecular quantum states efficiently, while classical computers require exponentially many bits.",
-        explanation_ar: "تخضع الجزيئات لميكانيكا الكم. يمكن للحاسوب الكمومي تمثيل الحالات الكمومية الجزيئية بكفاءة، بينما تحتاج الحواسيب الكلاسيكية إلى عدد أسي من البتات.",
+        question: "Why are molecules hard to simulate on a normal computer?",
+        question_ar: "لماذا يصعب محاكاة الجزيئات على حاسوب عادي؟",
+        options: [
+          "Atoms are too small to see",
+          "They move too fast",
+          "Computers don't know any chemistry",
+          "The number of quantum states grows extremely fast with the size of the molecule",
+        ],
+        options_ar: [
+          "لأن الذرات أصغر من أن تُرى",
+          "لأنها تتحرك بسرعة كبيرة",
+          "لأن الحواسيب لا تعرف شيئاً عن الكيمياء",
+          "لأن عدد الحالات الكمومية ينمو بسرعة هائلة مع حجم الجزيء",
+        ],
+        correctIndex: 3,
+        explanation: "The state of a molecule's electrons needs exponentially many numbers to describe, so exact simulation quickly becomes impossible for normal computers.",
+        explanation_ar: "تحتاج حالة إلكترونات الجزيء إلى عدد أسّي من الأرقام لوصفها، لذلك تصبح المحاكاة الدقيقة سريعاً مستحيلة على الحواسيب العادية.",
       },
       {
-        question: "What does VQE stand for?",
-        question_ar: "ماذا تعني اختصار VQE؟",
-        options: ["Variable Quantum Estimator", "Variational Quantum Eigensolver", "Virtual Qubit Environment", "Verified Quantum Experiment"],
-        options_ar: ["المقدِّر الكمومي المتغيّر", "محلّل القيم الذاتية التغيّري الكمومي", "بيئة الكيوبت الافتراضية", "التجربة الكمومية المتحقق منها"],
+        question: "In the team approach, what does the normal computer do?",
+        question_ar: "في نهج الفريق، ماذا يفعل الحاسوب العادي؟",
+        options: [
+          "It replaces the qubits",
+          "It reads the results and adjusts the quantum circuit to improve the guess",
+          "It builds the molecule",
+          "It cools the quantum chip",
+        ],
+        options_ar: [
+          "يحل محل الكيوبتات",
+          "يقرأ النتائج ويعدّل الدائرة الكمومية لتحسين التخمين",
+          "يصنع الجزيء",
+          "يبرّد الشريحة الكمومية",
+        ],
         correctIndex: 1,
-        explanation: "VQE stands for Variational Quantum Eigensolver — a quantum-classical hybrid algorithm for finding ground state energies of molecules.",
-        explanation_ar: "VQE اختصار لـ Variational Quantum Eigensolver — خوارزمية هجينة كمومية-كلاسيكية لإيجاد طاقات الحالة الأرضية للجزيئات.",
+        explanation: "The quantum computer measures the energy of a guess, and the normal computer tweaks the circuit's settings and tries again.",
+        explanation_ar: "يقيس الحاسوب الكمومي طاقة تخمين ما، ثم يعدّل الحاسوب العادي إعدادات الدائرة ويحاول مجدداً.",
+      },
+      {
+        question: "Which statement is true today?",
+        question_ar: "أي عبارة صحيحة اليوم؟",
+        options: [
+          "Quantum computers are being tested on very small molecules but haven't yet beaten the best classical methods on a chemistry problem that matters",
+          "Quantum computers have already designed many new medicines",
+          "Classical computers can't simulate any molecules at all",
+          "Chemists are not allowed to use quantum computers",
+        ],
+        options_ar: [
+          "تُختبر الحواسيب الكمومية على جزيئات صغيرة جداً لكنها لم تتفوق بعد على أفضل الطرق الكلاسيكية في مسألة كيميائية مهمة",
+          "صمّمت الحواسيب الكمومية بالفعل أدوية جديدة كثيرة",
+          "لا تستطيع الحواسيب الكلاسيكية محاكاة أي جزيء إطلاقاً",
+          "لا يُسمح للكيميائيين باستخدام الحواسيب الكمومية",
+        ],
+        correctIndex: 0,
+        explanation: "The field is promising but still at an early stage. Today's quantum computers are small and noisy.",
+        explanation_ar: "المجال واعد لكنه ما يزال في مرحلة مبكرة. فالحواسيب الكمومية اليوم صغيرة ومشوِّشة.",
+      },
+      {
+        question: "Which physicist suggested in 1981 using quantum systems to simulate nature?",
+        question_ar: "أي فيزيائي اقترح عام 1981 استخدام أنظمة كمومية لمحاكاة الطبيعة؟",
+        options: ["Albert Einstein", "Niels Bohr", "Richard Feynman", "Alan Turing"],
+        options_ar: ["ألبرت أينشتاين", "نيلز بور", "ريتشارد فاينمان", "آلان تورينغ"],
+        correctIndex: 2,
+        explanation: "Richard Feynman proposed that a computer built from quantum parts would be the natural way to simulate quantum nature.",
+        explanation_ar: "اقترح ريتشارد فاينمان أن الحاسوب المبني من أجزاء كمومية هو الطريقة الطبيعية لمحاكاة الطبيعة الكمومية.",
       },
     ],
   },
+
+  // ───────────────────────────── 6. ALGORITHMS ─────────────────────────────
   {
     id: "algorithms",
     title: "Algorithms",
     title_ar: "الخوارزميات الكمومية",
-    description: "Landmark quantum algorithms and their advantages: from Deutsch-Jozsa to Shor and Grover.",
-    description_ar: "الخوارزميات الكمومية البارزة ومزاياها: من دويتش-يوزسا إلى شور وغروفر.",
-    topics: ["Deutsch-Jozsa", "Grover search", "Shor factoring", "Quantum Fourier Transform"],
-    topics_ar: ["دويتش-يوزسا", "بحث غروفر", "تحليل شور", "تحويل فورييه الكمومي"],
-    difficulty: "Advanced",
-    estimatedMinutes: 45,
+    description: "What makes an algorithm quantum? Meet Grover's search and Shor's factoring, and learn what quantum computers are really good for.",
+    description_ar: "ما الذي يجعل الخوارزمية كمومية؟ تعرّف على بحث غروفر وتحليل شور، وما الذي تجيده الحواسيب الكمومية فعلاً.",
+    topics: ["Interference at work", "Grover's search", "Shor's algorithm", "The big picture"],
+    topics_ar: ["التداخل أثناء العمل", "بحث غروفر", "خوارزمية شور", "الصورة الكبيرة"],
+    difficulty: "Intermediate",
+    estimatedMinutes: 25,
     dayIndex: 6,
     isFinalDay: true,
     content: [
       {
         id: "alg-1",
-        title: "Deutsch-Jozsa: First Quantum Speedup",
-        title_ar: "دويتش-يوزسا: أول تسريع كمومي",
-        body: `The first algorithm to demonstrate quantum advantage over classical computation (1992).
+        title: "What Makes an Algorithm Quantum?",
+        title_ar: "ما الذي يجعل الخوارزمية كمومية؟",
+        body: `A quantum algorithm follows a pattern you already know from the earlier lessons:
 
-Problem: Given a function f:{0,1}ⁿ → {0,1}, determine if it's constant or balanced.
-Classical: Up to 2ⁿ⁻¹ + 1 queries worst case.
-Quantum: Exactly 1 query!
+1. Start the qubits in a simple state and use gates like H to create a superposition.
+2. Use more gates (often with entanglement) so that the amplitudes interfere: wrong answers cancel, the right answer adds up.
+3. Measure. If the circuit was designed well, the right answer shows up with high probability.
 
-The algorithm applies H to all n qubits, queries f once using quantum parallelism, applies H again, then measures. If all zeros → constant; otherwise → balanced.
+Quantum computers are not faster at everything. The size of the speedup depends on the problem:
+• For many problems there is no known quantum speedup.
+• For some, such as searching, the speedup is moderate (Grover's algorithm).
+• For a few, such as factoring, the speedup is dramatic (Shor's algorithm).
 
-Its real importance: proved quantum computers can solve problems fundamentally faster than classical ones.`,
-        body_ar: `أول خوارزمية أثبتت الميزة الكمومية على الحوسبة الكلاسيكية (1992).
+Finding out which problems benefit is an active area of research.`,
+        body_ar: `تتبع الخوارزمية الكمومية نمطاً تعرفه من الدروس السابقة:
 
-المسألة: بالنظر إلى دالة f:{0,1}ⁿ → {0,1}، حدد إن كانت ثابتة أم متوازنة.
-كلاسيكياً: حتى 2ⁿ⁻¹ + 1 استعلام في أسوأ الحالات.
-كمومياً: استعلام واحد بالضبط!
+1. ابدأ الكيوبتات من حالة بسيطة واستخدم بوابات مثل H لإنشاء تراكب.
+2. استخدم بوابات أخرى (غالباً مع التشابك) بحيث تتداخل السعات: تلغي الإجابات الخاطئة بعضها وتتجمع الإجابة الصحيحة.
+3. قِس. فإذا صُمِّمت الدائرة جيداً تظهر الإجابة الصحيحة باحتمال عالٍ.
 
-تطبّق الخوارزمية H على جميع الكيوبتات الـ n، تستعلم f مرة باستخدام التوازي الكمومي، تطبق H مرة أخرى، ثم تقيس. إذا كانت كلها أصفاراً ← ثابتة؛ وإلا ← متوازنة.
+الحواسيب الكمومية ليست أسرع في كل شيء. فحجم التسريع يعتمد على المسألة:
+• في مسائل كثيرة لا يوجد تسريع كمومي معروف.
+• في بعضها، كالبحث، يكون التسريع متوسطاً (خوارزمية غروفر).
+• وفي قلة منها، كتحليل الأعداد، يكون التسريع كبيراً جداً (خوارزمية شور).
 
-أهميتها الحقيقية: أثبتت أن الحواسيب الكمومية يمكنها حل مسائل بشكل أسرع جوهرياً من الكلاسيكية.`,
+ومعرفة أي المسائل تستفيد من ذلك مجال بحث نشط.`,
         visualHint: "circuit",
       },
       {
         id: "alg-2",
-        title: "Grover's Search: Quadratic Speedup",
-        title_ar: "بحث غروفر: تسريع تربيعي",
-        body: `Grover's algorithm (1996) searches an unsorted database of N items in O(√N) queries.
+        title: "Grover's Search",
+        title_ar: "بحث غروفر",
+        body: `Imagine a phone book with 1,000,000 names in random order, and you want to find one particular number. A normal computer has to check names one by one: about 500,000 checks on average.
 
-Classical: O(N) average, O(N) worst case
-Quantum: O(√N) — for N=1,000,000: only 1,000 queries!
+Grover's algorithm (1996) needs only about 800 steps. In general, searching N items takes about √N steps instead of about N steps. This is called a quadratic speedup.
 
-How it works:
-1. Start in equal superposition of all N states
-2. Apply 'oracle' to mark the target (phase flip)
-3. Apply 'diffusion' operator to amplify the marked state
-4. Repeat ~π√N/4 times
-5. Measure — high probability of finding target
+How it works, in simple terms:
+1. Put all the possibilities into an equal superposition (H on every qubit).
+2. Mark the right answer by flipping the sign of its amplitude. If you measured now, nothing would look different.
+3. Run an "amplify" step that turns the sign flip into a larger amplitude for the right answer.
+4. Repeat steps 2–3 about √N times, then measure.
 
-Note: This is a quadratic speedup — provably optimal for quantum search.`,
-        body_ar: `خوارزمية غروفر (1996) تبحث في قاعدة بيانات غير مرتبة من N عنصر في O(√N) استعلام.
+Surprising detail: don't repeat too many times. Past the best point, the right answer's chance goes back down, like pushing a swing at the wrong moment.
 
-كلاسيكياً: O(N) متوسطاً وأسوأ حالة
-كمومياً: O(√N) — لـ N=1,000,000: فقط 1,000 استعلام!
+Fun fact: with just 4 items (2 qubits), one round finds the right answer every time.`,
+        body_ar: `تخيّل دليل هاتف فيه 1,000,000 اسم بترتيب عشوائي، وتريد العثور على رقم محدد. على الحاسوب العادي أن يفحص الأسماء واحداً واحداً: نحو 500,000 فحص في المتوسط.
 
-آلية العمل:
-1. البدء في تراكب متساوٍ لجميع الحالات الـ N
-2. تطبيق 'الأوراكل' لوسم الهدف (قلب الطور)
-3. تطبيق مشغّل 'الانتشار' لتضخيم الحالة الموسومة
-4. التكرار ~π√N/4 مرة
-5. القياس — احتمال عالٍ لإيجاد الهدف
+أما خوارزمية غروفر (1996) فتحتاج إلى نحو 800 خطوة فقط. وبوجه عام فإن البحث في N عنصر يحتاج إلى نحو √N خطوة بدلاً من نحو N خطوة. وهذا يسمى تسريعاً تربيعياً.
 
-ملاحظة: هذا تسريع تربيعي — وهو الأمثل مُثبَتاً للبحث الكمومي.`,
+كيف تعمل، ببساطة:
+1. ضع كل الاحتمالات في تراكب متساوٍ (H على كل كيوبت).
+2. علّم الإجابة الصحيحة بقلب إشارة سعتها. لو قست الآن فلن يبدو شيء مختلفاً.
+3. نفّذ خطوة "تضخيم" تحوّل قلب الإشارة إلى سعة أكبر للإجابة الصحيحة.
+4. كرّر الخطوتين 2–3 نحو √N مرة ثم قِس.
+
+تفصيل مدهش: لا تكرر أكثر من اللازم. فبعد أفضل نقطة يعود احتمال الإجابة الصحيحة إلى الانخفاض، كمن يدفع أرجوحة في اللحظة الخاطئة.
+
+معلومة طريفة: مع 4 عناصر فقط (كيوبتان) تجد جولة واحدة الإجابة الصحيحة في كل مرة.`,
         visualHint: "none",
       },
       {
         id: "alg-3",
-        title: "Shor's Algorithm: Exponential Speedup",
-        title_ar: "خوارزمية شور: تسريع أسي",
-        body: `Shor's algorithm (1994) factors integers in polynomial time — threatening RSA.
+        title: "Shor's Algorithm",
+        title_ar: "خوارزمية شور",
+        body: `Factoring means splitting a number into primes. For 15 it is easy: 3 × 5. For a number with 600 digits, the best known methods on normal computers would take an impossibly long time. That difficulty protects much of today's encryption (Lesson 4).
 
-Classical: Exponential time O(exp(n^{1/3}))
-Quantum: Polynomial time O(n³)
+Shor's algorithm (1994) finds the factors with a quantum computer. The key idea: factoring can be turned into finding a hidden repeating pattern in a list of numbers. Quantum interference (using a tool called the Quantum Fourier Transform, which finds repeating patterns a bit like finding the pitch of a sound) is very good at that.
 
-For a 2048-bit number:
-Classical → longer than the age of the universe
-Quantum → hours on a large quantum computer
+The speedup is dramatic: the time needed grows much more slowly with the size of the number than for the best known normal methods.
 
-The quantum core uses the Quantum Fourier Transform (QFT) to find the period of a modular function. This is the most practically important quantum algorithm.
+Status today: in 2001 a small quantum machine factored 15 = 3 × 5. Breaking real encryption needs huge, error-corrected quantum computers that do not exist yet. That is why the world is already moving to post-quantum cryptography.`,
+        body_ar: `تحليل عدد إلى عوامله يعني تقسيمه إلى أعداد أولية. وهو سهل مع 15: ‏3 × 5. أما مع عدد من 600 رقم فإن أفضل الطرق المعروفة على الحواسيب العادية تستغرق وقتاً طويلاً لدرجة الاستحالة. وهذه الصعوبة تحمي جزءاً كبيراً من تشفير اليوم (الدرس 4).
 
-Status: Today's quantum computers cannot yet break RSA — insufficient qubits and too much noise. But post-quantum migration should begin now.`,
-        body_ar: `خوارزمية شور (1994) تُحلّل الأعداد الصحيحة في وقت متعدد الحدود — مهددةً RSA.
+تجد خوارزمية شور (1994) العوامل بحاسوب كمومي. الفكرة الأساسية: يمكن تحويل التحليل إلى إيجاد نمط متكرر مخفي في قائمة أعداد. والتداخل الكمومي (باستخدام أداة اسمها تحويل فورييه الكمومي، وهي تكتشف الأنماط المتكررة كما تكتشف طبقة الصوت) بارع جداً في ذلك.
 
-كلاسيكياً: وقت أسي O(exp(n^{1/3}))
-كمومياً: وقت متعدد الحدود O(n³)
+التسريع كبير: يزداد الزمن اللازم مع حجم العدد ببطء أكبر بكثير مما في أفضل الطرق العادية المعروفة.
 
-لعدد من 2048 بت:
-كلاسيكياً ← أطول من عمر الكون
-كمومياً ← ساعات على حاسوب كمومي كبير
+الوضع اليوم: في عام 2001 حلّلت آلة كمومية صغيرة العدد 15 = 3 × 5. أما كسر تشفير حقيقي فيحتاج إلى حواسيب كمومية ضخمة تصحّح أخطاءها وهي غير موجودة بعد. ولهذا يتجه العالم فعلاً نحو التشفير ما بعد الكمومي.`,
+        visualHint: "none",
+      },
+      {
+        id: "alg-4",
+        title: "The Big Picture",
+        title_ar: "الصورة الكبيرة",
+        body: `Quantum computers are not expected to replace your laptop or phone. Think of them as specialized helpers, a bit like graphics cards (GPUs), that may one day speed up certain hard problems:
+• simulating molecules and materials (Lesson 5)
+• some search and optimization tasks
+• breaking some kinds of encryption (and driving the move to safer encryption)
 
-تستخدم النواة الكمومية تحويل فورييه الكمومي (QFT) لإيجاد دورة دالة معيارية. هذه أهم الخوارزميات الكمومية عملياً.
+Being honest matters in this field: there is a lot of hype. A good habit is to ask "which problem, how much faster, compared with what, and on which hardware?" whenever you read a big claim.
 
-الوضع الحالي: لا تستطيع الحواسيب الكمومية الحالية بعد كسر RSA — كيوبتات غير كافية وضجيج كثير. لكن الانتقال إلى ما بعد الكمومي يجب أن يبدأ الآن.`,
+Want to keep going? You can learn to write real quantum circuits for free with tools such as Qiskit and the IBM Quantum Learning website, and you don't need advanced physics to start.`,
+        body_ar: `لا يُتوقع أن تحل الحواسيب الكمومية محل حاسوبك المحمول أو هاتفك. فكّر فيها كمساعدين متخصصين، أشبه بكروت الرسوميات (GPU)، قد يسرّعون يوماً ما مسائل صعبة معينة:
+• محاكاة الجزيئات والمواد (الدرس 5)
+• بعض مهام البحث والتحسين
+• كسر بعض أنواع التشفير (ودفع الانتقال إلى تشفير أكثر أماناً)
+
+الأمانة مهمة في هذا المجال: فيه الكثير من المبالغة. وعادة جيدة أن تسأل عند قراءة أي ادعاء كبير: "أي مسألة؟ وكم أسرع؟ مقارنة بماذا؟ وعلى أي عتاد؟"
+
+تريد المتابعة؟ يمكنك تعلّم كتابة دوائر كمومية حقيقية مجاناً باستخدام أدوات مثل Qiskit وموقع IBM Quantum Learning، ولا تحتاج إلى فيزياء متقدمة للبدء.`,
         visualHint: "none",
       },
     ],
     faqs: [
       {
-        question: "Are quantum speedups always exponential?",
-        question_ar: "هل التسريعات الكمومية دائماً أسية؟",
-        answer: "No — quantum speedups vary by problem. Shor's provides exponential speedup for factoring. Grover's provides quadratic speedup for search. For many problems, no quantum speedup exists. The study of which problems admit quantum speedups is an active area of research.",
-        answer_ar: "لا — تتفاوت التسريعات الكمومية حسب المسألة. شور يوفر تسريعاً أسياً للتحليل. غروفر يوفر تسريعاً تربيعياً للبحث. لكثير من المسائل لا يوجد تسريع كمومي. دراسة أي المسائل تقبل التسريعات الكمومية مجال بحث نشط.",
+        question: "Are quantum speedups always huge?",
+        question_ar: "هل التسريعات الكمومية دائماً كبيرة؟",
+        answer: "No. Grover's search gives a quadratic speedup, Shor's factoring a dramatic one, and for many problems no speedup is known at all. Each problem has to be studied separately.",
+        answer_ar: "لا. بحث غروفر يعطي تسريعاً تربيعياً، وتحليل شور تسريعاً كبيراً، وفي مسائل كثيرة لا يُعرف أي تسريع. ولا بد من دراسة كل مسألة على حدة.",
       },
       {
-        question: "What is BQP?",
-        question_ar: "ما هو BQP؟",
-        answer: "BQP (Bounded-error Quantum Polynomial time) is the class of problems solvable by a quantum computer in polynomial time with high probability. It contains P and is believed to be larger than P (explaining quantum advantage). Whether BQP contains NP is an open question.",
-        answer_ar: "BQP (زمن متعدد الحدود الكمومي محدود الخطأ) هو صنف المسائل القابلة للحل بواسطة حاسوب كمومي في وقت متعدد الحدود باحتمال عالٍ. يحتوي P ويُعتقد أنه أكبر من P (مما يفسر الميزة الكمومية). ما إذا كان BQP يحتوي NP سؤال مفتوح.",
+        question: "Can quantum computers solve the very hardest problems quickly?",
+        question_ar: "هل تستطيع الحواسيب الكمومية حل أصعب المسائل بسرعة؟",
+        answer: "Most experts believe not. The hardest known kinds of problems (called NP-complete) are not expected to become easy, even with a quantum computer. Quantum computers are expected to help with certain structured problems.",
+        answer_ar: "يعتقد معظم الخبراء أنها لا تستطيع. فأصعب أنواع المسائل المعروفة (المسماة NP-كاملة) لا يُتوقع أن تصبح سهلة حتى بحاسوب كمومي. ويُتوقع أن تفيد الحواسيب الكمومية في مسائل منظَّمة معينة.",
+      },
+      {
+        question: "Do I need to be a physicist to program a quantum computer?",
+        question_ar: "هل أحتاج إلى أن أكون فيزيائياً لبرمجة حاسوب كمومي؟",
+        answer: "No. Many people start with circuits, a bit of linear algebra and some Python. Free tools let you build and simulate circuits on your own laptop.",
+        answer_ar: "لا. يبدأ كثيرون بالدوائر وقليل من الجبر الخطي وبعض لغة بايثون. وتتيح لك أدوات مجانية بناء الدوائر ومحاكاتها على حاسوبك المحمول.",
       },
     ],
     quiz: [
       {
-        question: "Grover's algorithm provides what type of speedup?",
-        question_ar: "ما نوع التسريع الذي توفره خوارزمية غروفر؟",
-        options: ["Exponential speedup", "Quadratic speedup (√N)", "Linear speedup", "Logarithmic speedup"],
-        options_ar: ["تسريع أسي", "تسريع تربيعي (√N)", "تسريع خطي", "تسريع لوغاريتمي"],
-        correctIndex: 1,
-        explanation: "Grover's algorithm searches N items in O(√N) queries — a quadratic speedup over classical O(N). It is provably optimal for quantum search.",
-        explanation_ar: "تبحث خوارزمية غروفر في N عنصر في O(√N) استعلام — تسريع تربيعي مقارنة بالكلاسيكي O(N). وهو الأمثل مُثبَتاً للبحث الكمومي.",
+        question: "Roughly how many steps does Grover's algorithm need to search 1,000,000 unsorted items?",
+        question_ar: "كم خطوة تقريباً تحتاج خوارزمية غروفر للبحث في 1,000,000 عنصر غير مرتّب؟",
+        options: ["1,000,000", "500,000", "About 800", "Just 1"],
+        options_ar: ["1,000,000", "500,000", "نحو 800", "خطوة واحدة فقط"],
+        correctIndex: 2,
+        explanation: "Grover's algorithm needs about √N steps. The square root of 1,000,000 is 1,000, and the exact count is about 0.8 × 1,000 ≈ 800 steps.",
+        explanation_ar: "تحتاج خوارزمية غروفر إلى نحو √N خطوة. والجذر التربيعي لـ 1,000,000 هو 1,000، والعدد الدقيق نحو 0.8 × 1,000 ≈ 800 خطوة.",
       },
       {
         question: "Which quantum algorithm threatens RSA encryption?",
         question_ar: "أي خوارزمية كمومية تهدد تشفير RSA؟",
-        options: ["Grover's algorithm", "VQE", "Shor's algorithm", "Deutsch-Jozsa"],
-        options_ar: ["خوارزمية غروفر", "VQE", "خوارزمية شور", "دويتش-يوزسا"],
-        correctIndex: 2,
-        explanation: "Shor's algorithm factors integers in polynomial time, which would break RSA encryption if run on a sufficiently large quantum computer.",
-        explanation_ar: "تُحلّل خوارزمية شور الأعداد الصحيحة في وقت متعدد الحدود، مما سيكسر تشفير RSA إذا شُغّلت على حاسوب كمومي كبير بما يكفي.",
+        options: ["Shor's algorithm", "Grover's algorithm", "The BB84 protocol", "The Hadamard gate"],
+        options_ar: ["خوارزمية شور", "خوارزمية غروفر", "بروتوكول BB84", "بوابة هادامار"],
+        correctIndex: 0,
+        explanation: "Shor's algorithm factors large numbers efficiently on a large enough quantum computer. BB84 is a key-sharing protocol, and H is just one gate.",
+        explanation_ar: "تحلّل خوارزمية شور الأعداد الكبيرة بكفاءة على حاسوب كمومي كبير بما يكفي. أما BB84 فهو بروتوكول لتبادل المفاتيح، وH مجرد بوابة واحدة.",
       },
       {
-        question: "What key technique does Shor's algorithm use?",
-        question_ar: "ما التقنية الرئيسية التي تستخدمها خوارزمية شور؟",
-        options: ["Quantum teleportation", "Quantum Fourier Transform", "Grover's diffusion operator", "BB84 protocol"],
-        options_ar: ["الإرسال الكمومي", "تحويل فورييه الكمومي", "مشغّل انتشار غروفر", "بروتوكول BB84"],
+        question: "What is the main trick behind quantum algorithms?",
+        question_ar: "ما الحيلة الرئيسية وراء الخوارزميات الكمومية؟",
+        options: [
+          "Trying every answer at once and reading them all",
+          "Running a faster clock",
+          "Using more electricity",
+          "Using interference so wrong answers cancel and the right answer adds up",
+        ],
+        options_ar: [
+          "تجربة كل الإجابات دفعة واحدة وقراءتها جميعاً",
+          "تشغيل ساعة أسرع",
+          "استخدام كهرباء أكثر",
+          "استخدام التداخل بحيث تلغي الإجابات الخاطئة بعضها وتتجمع الإجابة الصحيحة",
+        ],
+        correctIndex: 3,
+        explanation: "A measurement only returns one result, so algorithms use interference to make the correct answer the most likely one.",
+        explanation_ar: "القياس يعطي نتيجة واحدة فقط، لذلك تستخدم الخوارزميات التداخل لجعل الإجابة الصحيحة هي الأرجح.",
+      },
+      {
+        question: "What role are quantum computers expected to play?",
+        question_ar: "ما الدور المتوقع للحواسيب الكمومية؟",
+        options: [
+          "Replacing laptops and phones",
+          "Specialized helpers for certain hard problems",
+          "Running every app much faster",
+          "Taking over the internet within a year",
+        ],
+        options_ar: [
+          "الحلول محل الحواسيب المحمولة والهواتف",
+          "مساعدات متخصصة في مسائل صعبة معينة",
+          "تشغيل كل التطبيقات أسرع بكثير",
+          "السيطرة على الإنترنت خلال عام",
+        ],
         correctIndex: 1,
-        explanation: "The quantum core of Shor's algorithm uses the Quantum Fourier Transform to find the period of a modular function, which reveals the factors.",
-        explanation_ar: "تستخدم النواة الكمومية لخوارزمية شور تحويل فورييه الكمومي لإيجاد دورة دالة معيارية، مما يكشف عن العوامل.",
+        explanation: "Quantum computers are expected to be specialized accelerators for particular problems, working alongside normal computers.",
+        explanation_ar: "يُتوقع أن تكون الحواسيب الكمومية مسرّعات متخصصة لمسائل معينة، تعمل إلى جانب الحواسيب العادية.",
       },
     ],
   },
