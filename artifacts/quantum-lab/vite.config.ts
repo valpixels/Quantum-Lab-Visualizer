@@ -26,6 +26,9 @@ if (!basePath) {
   );
 }
 
+// Where the API/WebSocket server runs, so the app also works on a plain LAN without Replit routing.
+const apiTarget = process.env.API_PROXY_TARGET ?? "http://127.0.0.1:8080";
+
 export default defineConfig({
   base: basePath,
   plugins: [
@@ -66,10 +69,18 @@ export default defineConfig({
       strict: true,
       deny: ["**/.*"],
     },
+    proxy: {
+      "/api": { target: apiTarget, changeOrigin: true },
+      "/ws": { target: apiTarget, ws: true, changeOrigin: true },
+    },
   },
   preview: {
     port,
     host: "0.0.0.0",
     allowedHosts: true,
+    proxy: {
+      "/api": { target: apiTarget, changeOrigin: true },
+      "/ws": { target: apiTarget, ws: true, changeOrigin: true },
+    },
   },
 });

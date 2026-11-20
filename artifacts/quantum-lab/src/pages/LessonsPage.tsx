@@ -3,8 +3,10 @@ import { useApp } from "@/context/AppContext";
 import { LESSONS, LessonModule, getLessonById } from "@/lib/lessons";
 import { t } from "@/lib/i18n";
 import BlochSphere from "@/components/BlochSphere";
+import QuantumCircuit from "@/components/QuantumCircuit";
+import PracticeView from "@/components/PracticeView";
 
-type SubView = "content" | "quiz" | "faq";
+type SubView = "content" | "practice" | "quiz" | "faq";
 
 interface LessonsPageProps {
   initialLessonId?: string;
@@ -12,7 +14,7 @@ interface LessonsPageProps {
 }
 
 function QuizView({ lesson }: { lesson: LessonModule }) {
-  const { language } = useApp();
+  const { language, reportProgress } = useApp();
   const isRTL = language === "ar";
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
@@ -34,7 +36,10 @@ function QuizView({ lesson }: { lesson: LessonModule }) {
   };
 
   const handleNext = () => {
-    if (current + 1 >= lesson.quiz.length) setDone(true);
+    if (current + 1 >= lesson.quiz.length) {
+      setDone(true);
+      reportProgress({ kind: "quiz", lessonId: lesson.id, score, total: lesson.quiz.length });
+    }
     else { setCurrent((c) => c + 1); setSelected(null); setChecked(false); }
   };
 
@@ -180,7 +185,7 @@ function PresentationView({ lesson, onClose }: { lesson: LessonModule; onClose: 
       </div>
 
       <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-3xl rounded-3xl p-10 shadow-xl bg-white" style={{ border: "2px solid #f0b8b8", minHeight: "60vh" }}>
+        <div className="w-full max-w-3xl rounded-3xl p-10 solid-shadow bg-white" style={{ border: "2px solid #f0b8b8", minHeight: "60vh" }}>
           <div className="px-3 py-1 rounded-full text-xs font-black inline-block mb-6" style={{ background: "#fce4e4", color: "#1a0f6e" }}>
             {slide + 1} / {sections.length}
           </div>
@@ -290,7 +295,7 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
                   cursor: unlocked ? "pointer" : "not-allowed",
                 }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-sm shrink-0"
-                  style={{ background: bg, color: "#1a0f6e" }}>
+                  style={{ background: bg, color: "#1a0f6e", border: "2px solid #1a0f6e" }}>
                   {unlocked ? l.dayIndex : "🔒"}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -346,7 +351,7 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
                   cursor: unlocked ? "pointer" : "not-allowed",
                 }}>
                 <div className="w-6 h-6 rounded-lg flex items-center justify-center font-black text-xs shrink-0"
-                  style={{ background: bg, color: "#1a0f6e" }}>
+                  style={{ background: bg, color: "#1a0f6e", border: "2px solid #1a0f6e" }}>
                   {unlocked ? l.dayIndex : "🔒"}
                 </div>
                 <span className="text-xs font-bold truncate" style={{ color: isActive ? "white" : "#1a0f6e" }}>
@@ -371,9 +376,10 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
             </span>
           </div>
           <div className="flex items-center gap-1.5 shrink-0">
-            {(["content", "faq", "quiz"] as SubView[]).map((v) => {
+            {(["content", ...(lesson.practice?.length ? ["practice"] : []), "faq", "quiz"] as SubView[]).map((v) => {
               const labels: Record<SubView, string> = {
                 content: language === "en" ? "Notes" : "ملاحظات",
+                practice: t(language, "practice"),
                 faq: t(language, "faq"),
                 quiz: t(language, "quiz"),
               };
@@ -430,6 +436,12 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
                     )}
                   </div>
 
+                  {section.circuit && (
+                    <div className="mt-5 overflow-x-auto rounded-2xl p-3 bg-white" style={{ border: "2px solid #f0b8b8" }}>
+                      <QuantumCircuit gates={section.circuit.gates} numQubits={section.circuit.numQubits} numSteps={section.circuit.numSteps} />
+                    </div>
+                  )}
+
                   {section.visualHint === "bloch" && (
                     <div className="flex flex-wrap gap-2 mt-5">
                       {[
@@ -472,10 +484,10 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
                         {t(language, "nextSection")} {isRTL ? "←" : "→"}
                       </button>
                     ) : (
-                      <button onClick={() => setSubView("quiz")}
+                      <button onClick={() => setSubView(lesson.practice?.length ? "practice" : "quiz")}
                         className="px-4 py-2 rounded-xl text-sm font-bold"
                         style={{ background: "#c5b8f5", color: "#1a0f6e" }}>
-                        {language === "en" ? "Take Quiz →" : "→ الاختبار"}
+                        {lesson.practice?.length ? (language === "en" ? "Practice →" : "→ التدريب") : (language === "en" ? "Take Quiz →" : "→ الاختبار")}
                       </button>
                     )}
                   </div>
@@ -483,7 +495,8 @@ export default function LessonsPage({ initialLessonId, onNavigate: _onNavigate }
               )}
             </div>
           )}
-          {subView === "quiz" && <QuizView lesson={lesson} />}
+          {subView === "practice" && <PracticeView key={lesson.id} lesson={lesson} />}
+          {subView === "quiz" && <QuizView key={lesson.id} lesson={lesson} />}
           {subView === "faq" && <FAQView lesson={lesson} />}
         </div>
       </div>

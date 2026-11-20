@@ -6,9 +6,10 @@ import LessonsPage from "@/pages/LessonsPage";
 import BlochPage from "@/pages/BlochPage";
 import CircuitPage from "@/pages/CircuitPage";
 import SurveyPage from "@/pages/SurveyPage";
+import ClassPage from "@/pages/ClassPage";
 import { TOTAL_DAYS } from "@/lib/lessons";
 
-type View = "home" | "lessons" | "bloch" | "circuit" | "survey";
+type View = "home" | "lessons" | "bloch" | "circuit" | "survey" | "class";
 
 const HomeIcon = () => (
   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -39,6 +40,14 @@ const CircuitIcon = () => (
     <rect x="7" y="6" width="3" height="4" rx="1" fill="currentColor" stroke="none" opacity="0.7" />
     <rect x="13" y="10" width="3" height="4" rx="1" fill="currentColor" stroke="none" opacity="0.7" />
     <rect x="9" y="14" width="3" height="4" rx="1" fill="currentColor" stroke="none" opacity="0.7" />
+  </svg>
+);
+const ClassIcon = () => (
+  <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M3 21h18" />
+    <rect x="5" y="11" width="3.5" height="7" rx="1" />
+    <rect x="10.25" y="6" width="3.5" height="12" rx="1" />
+    <rect x="15.5" y="9" width="3.5" height="9" rx="1" />
   </svg>
 );
 const MegaphoneIcon = () => (
@@ -76,7 +85,7 @@ function BroadcastPanel({ onClose }: { onClose: () => void }) {
   const studentCount = clients.filter((c) => c.role === "student").length;
 
   return (
-    <div className="absolute top-full end-0 mt-2 w-72 rounded-2xl shadow-xl z-50 overflow-hidden" style={{ background: "white", border: "2px solid #c5b8f5" }} dir={isRTL ? "rtl" : "ltr"}>
+    <div className="absolute top-full end-0 mt-2 w-72 rounded-2xl solid-shadow z-50 overflow-hidden" style={{ background: "white", border: "2px solid #c5b8f5" }} dir={isRTL ? "rtl" : "ltr"}>
       <div className="p-3" style={{ background: "#ddd4f8", borderBottom: "2px solid #c5b8f5" }}>
         <div className="flex items-center justify-between">
           <p className="font-black text-sm" style={{ color: "#1a0f6e" }}>
@@ -94,6 +103,7 @@ function BroadcastPanel({ onClose }: { onClose: () => void }) {
           onChange={(e) => setText(e.target.value)}
           placeholder={language === "en" ? "Type a message for all students..." : "اكتب رسالة لجميع الطلاب..."}
           rows={3}
+          maxLength={280}
           dir={isRTL ? "rtl" : "ltr"}
           className="w-full p-2 rounded-xl text-sm resize-none outline-none"
           style={{ background: "#fce4e4", border: "none", color: "#1a0f6e" }}
@@ -101,7 +111,7 @@ function BroadcastPanel({ onClose }: { onClose: () => void }) {
         />
         <div className="flex items-center justify-between mt-2">
           <p className="text-xs" style={{ color: "#9b8abf" }}>
-            {language === "en" ? "Ctrl+Enter to send" : "Ctrl+Enter للإرسال"}
+            {text.length}/280 · {language === "en" ? "Ctrl+Enter to send" : "Ctrl+Enter للإرسال"}
           </p>
           <button
             onClick={handleSend}
@@ -119,7 +129,7 @@ function BroadcastPanel({ onClose }: { onClose: () => void }) {
 
 export default function AppLayout() {
   const {
-    role, clientName, synced, unsync, resync, clients,
+    role, clientName, room, leave, synced, unsync, resync, clients,
     teacherState, updateTeacherState, connected, language, setLanguage,
     selfTeachingMode, programStartDate, currentDay,
     broadcastMessages, dismissBroadcast,
@@ -134,6 +144,7 @@ export default function AppLayout() {
 
   const displayView: View = (() => {
     if (isTeacher) {
+      if (localView === "class") return "class";
       if (teacherState.activeView === "bloch") return "bloch";
       if (teacherState.activeView === "circuit") return "circuit";
       return localView;
@@ -151,7 +162,8 @@ export default function AppLayout() {
 
   const handleNavigate = (view: View | "lessons" | "bloch" | "circuit", lessonId?: string) => {
     const v = view as View;
-    if (isTeacher) {
+    if (isTeacher && v !== "class") {
+      // The class results page is private to the teacher, so students keep seeing what they had.
       if (v === "bloch") updateTeacherState({ activeView: "bloch" });
       else if (v === "circuit") updateTeacherState({ activeView: "circuit" });
       else updateTeacherState({ activeView: "lessons" });
@@ -172,6 +184,7 @@ export default function AppLayout() {
     { id: "lessons", icon: <LessonsIcon />, label: t(language, "lessons") },
     { id: "bloch", icon: <BlochIcon />, label: t(language, "blochSphere") },
     { id: "circuit", icon: <CircuitIcon />, label: t(language, "circuitLab") },
+    ...(isTeacher ? [{ id: "class" as View, icon: <ClassIcon />, label: t(language, "classResults") }] : []),
   ];
 
   return (
@@ -227,6 +240,20 @@ export default function AppLayout() {
             <span>{studentCount} {t(language, studentCount === 1 ? "student_one" : "students")}</span>
           </div>
 
+          {/* Class code, shown to everyone so students can read it off the teacher's screen */}
+          {room && (
+            <button
+              type="button"
+              onClick={() => { try { void navigator.clipboard?.writeText(room); } catch { /* clipboard unavailable */ } }}
+              title={t(language, "copyClassCode")}
+              className="flex items-center gap-1.5 px-2 py-1 rounded-xl text-xs font-black transition-all solid-shadow-sm"
+              style={{ background: "#ddd4f8", color: "#1a0f6e", border: "2px solid #6b3abf", ["--shadow-color" as string]: "#6b3abf" }}
+            >
+              <span className="hidden sm:inline" style={{ color: "#6b3abf" }}>{t(language, "classCode")}</span>
+              <span className="font-mono tracking-widest text-sm" dir="ltr">{room}</span>
+            </button>
+          )}
+
           {/* Broadcast (teacher only) */}
           {isTeacher && (
             <div className="relative">
@@ -265,6 +292,17 @@ export default function AppLayout() {
             </button>
           )}
 
+          {/* Feedback survey (students) */}
+          {!isTeacher && (
+            <button
+              onClick={() => setSurveyOpen(true)}
+              className="px-2 py-1 rounded-xl text-xs font-bold hidden sm:block"
+              style={{ background: "#ddd4f8", color: "#1a0f6e" }}
+            >
+              {t(language, "feedback")}
+            </button>
+          )}
+
           {/* Language */}
           <button onClick={() => setLanguage(language === "en" ? "ar" : "en")}
             className="px-2 py-1 rounded-xl text-xs font-bold"
@@ -275,10 +313,30 @@ export default function AppLayout() {
           {/* Name */}
           <span className="text-xs font-medium hidden md:block" style={{ color: "#7c6fcd" }}>{clientName}</span>
 
+          {/* Leave (important on shared lab computers) */}
+          <button
+            onClick={() => { if (window.confirm(t(language, "leaveConfirm"))) leave(); }}
+            className="px-2 py-1 rounded-xl text-xs font-bold"
+            style={{ background: "white", color: "#1a0f6e", border: "1px solid #c5b8f5" }}
+          >
+            {t(language, "leaveClass")}
+          </button>
+
           {/* Connection */}
-          <div className={`w-2 h-2 rounded-full ${connected ? "bg-green-400" : "bg-amber-400 animate-pulse"}`} />
+          <div
+            className={`w-2 h-2 rounded-full ${connected ? "bg-green-400" : "bg-amber-400 animate-pulse"}`}
+            title={connected ? t(language, "connectedToServer") : t(language, "reconnecting")}
+          />
         </div>
       </header>
+
+      {/* Connection lost banner */}
+      {!connected && (
+        <div className="px-4 py-1.5 text-xs font-bold shrink-0" role="status"
+          style={{ background: "#fff3cd", borderBottom: "1px solid #f5e4b8", color: "#6e4a0f" }}>
+          {t(language, "connectionLost")}
+        </div>
+      )}
 
       {/* Broadcast messages (students only) */}
       {broadcastMessages.length > 0 && (
@@ -346,6 +404,8 @@ export default function AppLayout() {
           <BlochPage />
         ) : displayView === "circuit" ? (
           <CircuitPage />
+        ) : displayView === "class" && isTeacher ? (
+          <ClassPage />
         ) : (
           <Dashboard onNavigate={handleNavigate} />
         )}

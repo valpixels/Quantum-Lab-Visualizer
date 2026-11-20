@@ -91,7 +91,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
               {t(language, "dayOf", { day: currentDay, total: TOTAL_DAYS })}
             </p>
             <p className="text-xs" style={{ color: "#2a8a4a" }}>
-              {t(language, "todaysLesson")}: {LESSONS.find(l => l.dayIndex === currentDay)?.title}
+              {t(language, "todaysLesson")}: {(() => { const l = LESSONS.find((x) => x.dayIndex === currentDay); return language === "ar" ? (l?.title_ar ?? l?.title) : l?.title; })()}
             </p>
           </div>
         </div>
@@ -124,8 +124,8 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                 }}
               >
                 <div
-                  className="w-7 h-7 rounded-lg flex items-center justify-center font-black text-sm shrink-0"
-                  style={{ background: color.bg, color: color.num }}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center font-black text-sm shrink-0 solid-shadow-sm"
+                  style={{ background: color.bg, color: color.num, border: `2px solid ${color.num}`, ["--shadow-color" as string]: color.num }}
                 >
                   {lesson.dayIndex}
                 </div>
@@ -133,7 +133,7 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
                   className="text-xs font-bold truncate"
                   style={{ color: isActive ? "white" : "#1a0f6e" }}
                 >
-                  {lesson.title}
+                  {language === "ar" ? (lesson.title_ar ?? lesson.title) : lesson.title}
                 </span>
                 {!unlocked && selfTeachingMode && !!programStartDate && (
                   <div className="absolute top-1 right-1">
@@ -155,7 +155,10 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           className="p-5 rounded-2xl text-start transition-all hover:scale-105"
           style={{ background: "#c8eaf8", border: "2px solid #a8d8f5" }}
         >
-          <div className="mb-2">
+          <div
+            className="mb-3 w-12 h-12 rounded-xl flex items-center justify-center solid-shadow"
+            style={{ background: "#a8d8f5", border: "2px solid #1c85b5", ["--shadow-color" as string]: "#1c85b5" }}
+          >
             <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" style={{ color: "#1a0f6e" }}>
               <rect x="2" y="8" width="5" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
               <rect x="9.5" y="8" width="5" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.5" />
@@ -177,7 +180,10 @@ export default function Dashboard({ onNavigate }: DashboardProps) {
           className="p-5 rounded-2xl text-start transition-all hover:scale-105"
           style={{ background: "#ddd4f8", border: "2px solid #c5b8f5" }}
         >
-          <div className="mb-2">
+          <div
+            className="mb-3 w-12 h-12 rounded-xl flex items-center justify-center solid-shadow"
+            style={{ background: "#c5b8f5", border: "2px solid #6b3abf", ["--shadow-color" as string]: "#6b3abf" }}
+          >
             <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none" style={{ color: "#1a0f6e" }}>
               <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="1.5" />
               <ellipse cx="12" cy="12" rx="9" ry="3.5" stroke="currentColor" strokeWidth="1.2" opacity="0.6" transform="rotate(45 12 12)" />
