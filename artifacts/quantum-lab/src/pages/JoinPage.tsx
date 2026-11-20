@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useApp } from "@/context/AppContext";
-import { t } from "@/lib/i18n";
+import { t, TranslationKey } from "@/lib/i18n";
 
 const HelpIcon = () => (
   <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -28,18 +28,36 @@ const GridIcon = () => (
 );
 
 export default function JoinPage() {
-  const { join, joinError, connected, language, setLanguage } = useApp();
+  const { join, joinError, joinErrorCode, connected, resuming, language, setLanguage } = useApp();
   const [name, setName] = useState("");
   const [selectedRole, setSelectedRole] = useState<"teacher" | "student" | null>(null);
+  const [roomCode, setRoomCode] = useState("");
+  const [pin, setPin] = useState("");
   const [joining, setJoining] = useState(false);
 
   const isRTL = language === "ar";
 
+  // A rejected join must unlock the button again, otherwise it stays stuck on "Joining...".
+  useEffect(() => {
+    if (joinError) setJoining(false);
+  }, [joinError]);
+
+  const roomValid = /^[A-Z0-9]{4}$/.test(roomCode);
+  const credentialsOk = selectedRole === "student" ? roomValid : selectedRole === "teacher" ? pin.trim().length > 0 : false;
+  const canJoin = !!selectedRole && !!name.trim() && credentialsOk && connected && !joining;
+
   function handleJoin() {
-    if (!selectedRole || !name.trim() || !connected) return;
+    if (!canJoin || !selectedRole) return;
     setJoining(true);
-    join(selectedRole, name.trim());
+    join({
+      role: selectedRole,
+      name: name.trim(),
+      room: selectedRole === "student" ? roomCode : undefined,
+      pin: selectedRole === "teacher" ? pin.trim() : undefined,
+    });
   }
+
+  const errorText = joinErrorCode ? t(language, `err_${joinErrorCode}` as TranslationKey) : joinError;
 
   return (
     <div dir={isRTL ? "rtl" : "ltr"} className="min-h-screen flex flex-col" style={{ background: "hsl(350 100% 97%)" }}>
@@ -95,7 +113,7 @@ export default function JoinPage() {
         <div className="w-full max-w-sm text-center relative">
           {/* Logo */}
           <div className="flex justify-center mb-3">
-            <div className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-md" style={{ background: "#c5b8f5" }}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center solid-shadow" style={{ background: "#c5b8f5", border: "2px solid #6b3abf", ["--shadow-color" as string]: "#6b3abf" }}>
               <svg className="w-8 h-8" viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="12" r="9" stroke="#1a0f6e" strokeWidth="1.5" />
                 <ellipse cx="12" cy="12" rx="9" ry="3.5" stroke="#1a0f6e" strokeWidth="1.2" opacity="0.6" transform="rotate(40 12 12)" />
@@ -117,11 +135,19 @@ export default function JoinPage() {
             {connected ? t(language, "connectedToServer") : t(language, "connecting")}
           </div>
 
+          {resuming && (
+            <div className="mb-5 px-3 py-3 rounded-xl text-sm font-bold" role="status" style={{ background: "#ddd4f8", color: "#1a0f6e" }}>
+              {t(language, "rejoining")}
+            </div>
+          )}
+
           {/* Name input */}
           <input
             type="text"
             placeholder={t(language, "namePlaceholder")}
             value={name}
+            maxLength={30}
+            aria-label={t(language, "yourName")}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleJoin()}
             dir={isRTL ? "rtl" : "ltr"}
@@ -157,17 +183,62 @@ export default function JoinPage() {
             </button>
           </div>
 
-          {joinError && (
-            <div className="mb-4 px-3 py-2.5 rounded-xl text-sm font-medium"
-              style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#991b1b" }}>
-              {joinError}
+          {selectedRole === "student" && (
+            <div className="mb-5">
+              <label className="block text-sm font-bold mb-2" style={{ color: "#1a0f6e" }} htmlFor="room-code">
+                {t(language, "classCode")}
+              </label>
+              <input
+                id="room-code"
+                type="text"
+                inputMode="text"
+                autoCapitalize="characters"
+                autoComplete="off"
+                maxLength={4}
+                placeholder="ABCD"
+                value={roomCode}
+                onChange={(e) => setRoomCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                dir="ltr"
+                className="w-40 px-4 py-3 rounded-2xl text-xl font-black font-mono tracking-[0.4em] text-center outline-none"
+                style={{ background: "#fce4e4", border: "2px solid #f0b8b8", color: "#1a0f6e" }}
+              />
+              <p className="text-xs mt-2" style={{ color: "#9b8abf" }}>{t(language, "classCodeHelp")}</p>
             </div>
           )}
 
-          <button onClick={handleJoin} disabled={!selectedRole || !name.trim() || !connected}
-            className="px-10 py-3 rounded-2xl text-base font-bold transition-all shadow-md disabled:opacity-40 disabled:cursor-not-allowed"
+          {selectedRole === "teacher" && (
+            <div className="mb-5">
+              <label className="block text-sm font-bold mb-2" style={{ color: "#1a0f6e" }} htmlFor="teacher-pin">
+                {t(language, "teacherPin")}
+              </label>
+              <input
+                id="teacher-pin"
+                type="password"
+                autoComplete="off"
+                maxLength={64}
+                value={pin}
+                onChange={(e) => setPin(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+                dir="ltr"
+                className="w-48 px-4 py-3 rounded-2xl text-base font-bold text-center outline-none"
+                style={{ background: "#fce4e4", border: "2px solid #f0b8b8", color: "#1a0f6e" }}
+              />
+              <p className="text-xs mt-2" style={{ color: "#9b8abf" }}>{t(language, "teacherPinHelp")}</p>
+            </div>
+          )}
+
+          {errorText && (
+            <div className="mb-4 px-3 py-2.5 rounded-xl text-sm font-medium" role="alert"
+              style={{ background: "#fee2e2", border: "1px solid #fca5a5", color: "#991b1b" }}>
+              {errorText}
+            </div>
+          )}
+
+          <button onClick={handleJoin} disabled={!canJoin}
+            className="px-10 py-3 rounded-2xl text-base font-bold transition-all solid-shadow-sm disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ background: "#f0a0b8", color: "#1a0f6e", border: "none" }}>
-            {joining ? t(language, "joiningSession") : t(language, "ok")}
+            {joining ? t(language, "joiningSession") : selectedRole === "teacher" ? t(language, "startClass") : t(language, "ok")}
           </button>
 
           <p className="mt-4 text-xs" style={{ color: "#9b8abf" }}>{t(language, "oneTeacherNote")}</p>

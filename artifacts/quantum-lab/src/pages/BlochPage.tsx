@@ -22,6 +22,7 @@ export default function BlochPage() {
 
   const [localTheta, setLocalTheta] = useState(teacherTheta);
   const [localPhi, setLocalPhi] = useState(teacherPhi);
+  const [dragMode, setDragMode] = useState<"state" | "view">("state");
 
   const displayTheta = synced && !isTeacher ? teacherTheta : localTheta;
   const displayPhi = synced && !isTeacher ? teacherPhi : localPhi;
@@ -69,12 +70,42 @@ export default function BlochPage() {
             theta={displayTheta}
             phi={displayPhi}
             interactive={interactive}
+            dragMode={interactive ? dragMode : "view"}
             onStateChange={interactive ? handleStateChange : undefined}
           />
         </div>
 
         {/* Controls */}
-        <div className="flex flex-col gap-3 w-full lg:w-60 shrink-0">
+        <div className="flex flex-col gap-3 w-full lg:w-60 shrink-0 overflow-y-auto">
+          {/* What dragging the sphere does */}
+          <div className="p-3 rounded-2xl" style={{ background: "white", border: "2px solid #fce4e4" }}>
+            <p className="text-xs font-black mb-2 uppercase tracking-wider" style={{ color: "#7c6fcd" }}>
+              {t(language, "dragSphere")}
+            </p>
+            {interactive ? (
+              <div className="grid grid-cols-2 gap-1.5" role="group" aria-label={t(language, "dragSphere")}>
+                {(["state", "view"] as const).map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    aria-pressed={dragMode === m}
+                    onClick={() => setDragMode(m)}
+                    className="py-1.5 rounded-xl text-xs font-black transition-all"
+                    style={{
+                      background: dragMode === m ? "#c5b8f5" : "white",
+                      color: "#1a0f6e",
+                      border: "2px solid #c5b8f5",
+                    }}
+                  >
+                    {t(language, m === "state" ? "dragSetState" : "dragRotateView")}
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs" style={{ color: "#7c6fcd" }}>{t(language, "dragViewOnly")}</p>
+            )}
+          </div>
+
           {/* State info */}
           <div
             className="p-4 rounded-2xl"

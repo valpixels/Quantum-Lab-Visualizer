@@ -148,15 +148,19 @@
 }
 
 /* Pastel gate colors for circuit lab */
-.gate-H { background: #c5b8f5; color: #1a0f6e; }
-.gate-X { background: #f5a8c0; color: #6e0f2a; }
-.gate-Y { background: #f5c8a8; color: #6e2e0f; }
-.gate-Z { background: #f5e8a8; color: #6e5c0f; }
-.gate-S { background: #a8f5c8; color: #0f6e3a; }
-.gate-T { background: #a8e8f5; color: #0f4a6e; }
-.gate-CNOT { background: #d8a8f5; color: #3a0f6e; }
-.gate-SWAP { background: #a8c8f5; color: #0f2a6e; }
-.gate-M { background: #e8e8e8; color: #333; }
+/* Solid, colored offset shadows (replace the old blurred gray ones). Set --shadow-color per element. */
+.solid-shadow { box-shadow: 4px 4px 0 0 var(--shadow-color, #7c6fcd); }
+.solid-shadow-sm { box-shadow: 2px 2px 0 0 var(--shadow-color, #7c6fcd); }
+.gate-tile { border: 2px solid var(--shadow-color, #1a0f6e); }
+.gate-H { background: #c5b8f5; color: #1a0f6e; --shadow-color: #6b3abf; }
+.gate-X { background: #f5a8c0; color: #6e0f2a; --shadow-color: #c2305f; }
+.gate-Y { background: #f5c8a8; color: #6e2e0f; --shadow-color: #c76a28; }
+.gate-Z { background: #f5e8a8; color: #6e5c0f; --shadow-color: #b89a10; }
+.gate-S { background: #a8f5c8; color: #0f6e3a; --shadow-color: #1f9d5a; }
+.gate-T { background: #a8e8f5; color: #0f4a6e; --shadow-color: #1c85b5; }
+.gate-CNOT { background: #d8a8f5; color: #3a0f6e; --shadow-color: #8a3fc4; }
+.gate-SWAP { background: #a8c8f5; color: #0f2a6e; --shadow-color: #2f66c4; }
+.gate-M { background: #e8e8e8; color: #333; --shadow-color: #666; }
 
 @layer utilities {
   input[type="search"]::-webkit-search-cancel-button { @apply hidden; }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useApp } from "@/context/AppContext";
 import { t } from "@/lib/i18n";
+import { LESSONS } from "@/lib/lessons";
 
 interface SurveyData {
   overallRating: number;
@@ -12,9 +13,10 @@ interface SurveyData {
 }
 
 export default function SurveyPage({ onClose }: { onClose?: () => void }) {
-  const { language } = useApp();
+  const { language, reportProgress, mySurveyDone, connected } = useApp();
+  const [error, setError] = useState<string | null>(null);
   const isRTL = language === "ar";
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState(mySurveyDone);
   const [data, setData] = useState<SurveyData>({
     overallRating: 0,
     difficulty: 3,
@@ -26,6 +28,19 @@ export default function SurveyPage({ onClose }: { onClose?: () => void }) {
 
   const set = (key: keyof SurveyData, value: string | number) =>
     setData((d) => ({ ...d, [key]: value }));
+
+  const submit = () => {
+    if (data.overallRating < 1) {
+      setError(t(language, "surveyRatingNeeded"));
+      return;
+    }
+    if (!connected || !reportProgress({ kind: "survey", data })) {
+      setError(t(language, "surveyOffline"));
+      return;
+    }
+    setError(null);
+    setSubmitted(true);
+  };
 
   if (submitted) {
     return (
@@ -70,9 +85,10 @@ export default function SurveyPage({ onClose }: { onClose?: () => void }) {
   ];
   const questions = language === "ar" ? questions_ar : questions_en;
 
-  const topics = ["Qubits", "Superposition", "Entanglement", "Cryptography", "Biochemistry", "Algorithms"];
-  const topicsAr = ["الكيوبتات", "التراكب", "التشابك الكمومي", "التشفير", "الكيمياء الحيوية", "الخوارزميات"];
-  const topicList = language === "ar" ? topicsAr : topics;
+  const topicList = LESSONS.map((l) => ({
+    id: l.id,
+    label: language === "ar" ? (l.title_ar ?? l.title) : l.title,
+  }));
 
   return (
     <div className="p-5 max-w-xl mx-auto" dir={isRTL ? "rtl" : "ltr"}>
@@ -93,6 +109,9 @@ export default function SurveyPage({ onClose }: { onClose?: () => void }) {
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
+                type="button"
+                aria-label={`${star} / 5`}
+                aria-pressed={data.overallRating === star}
                 onClick={() => set("overallRating", star)}
                 className="text-2xl transition-all"
                 style={{ opacity: data.overallRating >= star ? 1 : 0.3 }}
@@ -133,9 +152,11 @@ export default function SurveyPage({ onClose }: { onClose?: () => void }) {
         <div className="p-4 rounded-2xl bg-white" style={{ border: "2px solid #fce4e4" }}>
           <p className="text-sm font-bold mb-3" style={{ color: "#1a0f6e" }}>{questions[2]}</p>
           <div className="flex flex-wrap gap-2">
-            {topicList.map((topic) => (
+            {topicList.map(({ id: topic, label }) => (
               <button
                 key={topic}
+                type="button"
+                aria-pressed={data.mostInteresting === topic}
                 onClick={() => set("mostInteresting", topic)}
                 className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
                 style={{
@@ -144,7 +165,7 @@ export default function SurveyPage({ onClose }: { onClose?: () => void }) {
                   border: `2px solid ${data.mostInteresting === topic ? "#7ac0e8" : "transparent"}`,
                 }}
               >
-                {topic}
+                {label}
               </button>
             ))}
           </div>
@@ -154,9 +175,11 @@ export default function SurveyPage({ onClose }: { onClose?: () => void }) {
         <div className="p-4 rounded-2xl bg-white" style={{ border: "2px solid #fce4e4" }}>
           <p className="text-sm font-bold mb-3" style={{ color: "#1a0f6e" }}>{questions[3]}</p>
           <div className="flex flex-wrap gap-2">
-            {topicList.map((topic) => (
+            {topicList.map(({ id: topic, label }) => (
               <button
                 key={topic}
+                type="button"
+                aria-pressed={data.leastClear === topic}
                 onClick={() => set("leastClear", topic)}
                 className="px-3 py-1.5 rounded-xl text-xs font-bold transition-all"
                 style={{
@@ -165,7 +188,7 @@ export default function SurveyPage({ onClose }: { onClose?: () => void }) {
                   border: `2px solid ${data.leastClear === topic ? "#e87aa0" : "transparent"}`,
                 }}
               >
-                {topic}
+                {label}
               </button>
             ))}
           </div>
@@ -206,6 +229,7 @@ export default function SurveyPage({ onClose }: { onClose?: () => void }) {
             onChange={(e) => set("comments", e.target.value)}
             dir={isRTL ? "rtl" : "ltr"}
             rows={3}
+            maxLength={500}
             placeholder={language === "en" ? "Your thoughts..." : "أفكارك..."}
             className="w-full p-3 rounded-xl text-sm resize-none outline-none"
             style={{ background: "#fce4e4", border: "none", color: "#1a0f6e" }}
@@ -213,8 +237,11 @@ export default function SurveyPage({ onClose }: { onClose?: () => void }) {
         </div>
       </div>
 
+      {error && (
+        <p role="alert" className="mt-4 text-sm font-bold" style={{ color: "#a0361d" }}>{error}</p>
+      )}
       <button
-        onClick={() => setSubmitted(true)}
+        onClick={submit}
         className="w-full mt-5 py-3 rounded-2xl font-black text-sm transition-all"
         style={{ background: "#c5b8f5", color: "#1a0f6e" }}
       >

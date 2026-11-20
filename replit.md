@@ -11,7 +11,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
 - **API framework**: Express 5
-- **Database**: PostgreSQL + Drizzle ORM
+- **Database**: Drizzle ORM package exists in `lib/db` but the quantum lab does not use it
 - **Validation**: Zod (`zod/v4`), `drizzle-zod`
 - **API codegen**: Orval (from OpenAPI spec)
 - **Build**: esbuild (CJS bundle)
@@ -24,13 +24,15 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 A quantum computing teaching module for computer science classroom labs.
 
 **Features:**
-- Role-based join (Teacher / Student) — only one teacher allowed per session
-- Real-time sync via WebSocket (teacher state synced to all "synced" students)
-- Sync / Unsync toggle — students can explore independently then resync
-- Bloch Sphere 3D visualization using Three.js (interactive for teacher/unsynced students)
-- Quantum Circuit Designer — visual grid-based circuit builder with gate palette
-- 5 lesson modules with structured sections (expandable)
-- Lessons: Qubits Intro, Quantum Gates, Quantum Circuits, Entanglement, Quantum Algorithms
+- Classes: the teacher opens a class with a PIN and gets a 4-character code; students join with the code
+- Real-time sync via WebSocket (teacher state synced to all "synced" students); students can unsync and re-sync
+- Bloch Sphere 3D visualization (Three.js), with a choice between setting the state and rotating the view
+- Circuit Lab: 5-qubit statevector simulator, CNOT/SWAP, measurement, OpenQASM export
+- 6 lesson modules (English + Arabic) with quizzes, FAQs, circuit pictures and self-checking Practice tasks
+- Teacher Class tab: online students, quiz scores, practice progress, anonymous survey results, CSV export
+- Survey answers are anonymous and stored in `surveys.jsonl` (`DATA_DIR`); no database is needed for the app
+
+See `README.md` and `TEACHER_GUIDE.md` for setup, environment variables and lesson plans.
 
 **Adding new lessons:** Edit `artifacts/quantum-lab/src/lib/lessons.ts` and add to the `LESSONS` array.
 

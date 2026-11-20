@@ -1,3 +1,46 @@
+import type { CircuitGate } from "@/lib/websocket";
+import type { BlochTaskSpec, CircuitTaskSpec } from "@/lib/quantum";
+import { EXAMPLE_CIRCUITS } from "@/lib/quantum";
+
+export interface LessonCircuit {
+  gates: CircuitGate[];
+  numQubits: number;
+  numSteps: number;
+}
+
+interface PracticeBase {
+  id: string;
+  prompt: string;
+  prompt_ar: string;
+  hint: string;
+  hint_ar: string;
+  /** Optional, harder tasks are labelled as challenges. */
+  challenge?: boolean;
+}
+
+export interface BlochPractice extends PracticeBase {
+  kind: "bloch";
+  spec: BlochTaskSpec;
+}
+
+export interface CircuitPractice extends PracticeBase {
+  kind: "circuit";
+  spec: CircuitTaskSpec;
+  numSteps: number;
+  /** Gate ids offered in the palette for this task. */
+  palette: string[];
+}
+
+export type PracticeTask = BlochPractice | CircuitPractice;
+
+const previewGate = (id: string, type: string, qubit: number, step: number, target?: number): CircuitGate => ({
+  id,
+  type,
+  qubit,
+  step,
+  ...(target === undefined ? {} : { target }),
+});
+
 export interface QuizQuestion {
   question: string;
   question_ar?: string;
@@ -23,6 +66,8 @@ export interface LessonSection {
   body_ar?: string;
   visualHint?: "bloch" | "circuit" | "none";
   blochState?: { theta: number; phi: number };
+  /** A read-only picture of a circuit shown under the text. */
+  circuit?: LessonCircuit;
 }
 
 export interface LessonModule {
@@ -37,6 +82,8 @@ export interface LessonModule {
   estimatedMinutes: number;
   dayIndex: number;
   isFinalDay?: boolean;
+  /** Hands-on tasks that are checked automatically. */
+  practice?: PracticeTask[];
   content: LessonSection[];
   faqs: FAQItem[];
   quiz: QuizQuestion[];
@@ -55,6 +102,44 @@ export const LESSONS: LessonModule[] = [
     difficulty: "Beginner",
     estimatedMinutes: 20,
     dayIndex: 1,
+    practice: [
+      {
+        id: "qubits-intro-1",
+        kind: "bloch",
+        prompt: "Make the qubit certain to measure 1 (P(|1⟩) = 100%).",
+        prompt_ar: "اجعل الكيوبت يعطي 1 بيقين (احتمال |1⟩ = 100%).",
+        hint: "|1⟩ is the South pole of the sphere.",
+        hint_ar: "|1⟩ هو القطب الجنوبي للكرة.",
+        spec: { target: { theta: Math.PI, phi: 0 }, tolerance: 0.1 },
+      },
+      {
+        id: "qubits-intro-2",
+        kind: "bloch",
+        prompt: "Make a 50/50 state that points along +X (this is the state |+⟩).",
+        prompt_ar: "اجعل حالة 50/50 تشير نحو المحور +X (وهي الحالة |+⟩).",
+        hint: "Put the arrow on the equator (θ = π/2) with φ = 0.",
+        hint_ar: "ضع السهم على خط الاستواء (θ = π/2) مع φ = 0.",
+        spec: { target: { theta: Math.PI / 2, phi: 0 }, tolerance: 0.15 },
+      },
+      {
+        id: "qubits-intro-3",
+        kind: "bloch",
+        prompt: "Find a state with about a 25% chance of measuring 0.",
+        prompt_ar: "جد حالة احتمال الحصول على 0 فيها نحو 25%.",
+        hint: "The arrow must be closer to the South pole than to the North pole. Watch the P(|0⟩) number change as you move θ.",
+        hint_ar: "يجب أن يكون السهم أقرب إلى القطب الجنوبي منه إلى الشمالي. راقب تغيّر P(|0⟩) وأنت تحرّك θ.",
+        spec: { p0: 0.25, tolerance: 0.04 },
+      },
+      {
+        id: "qubits-intro-4",
+        kind: "bloch",
+        prompt: "Make |−⟩: it is also 50/50, but on the opposite side of the equator from |+⟩.",
+        prompt_ar: "اجعل الحالة |−⟩: وهي أيضاً 50/50 لكنها على الجانب المقابل من خط الاستواء بالنسبة إلى |+⟩.",
+        hint: "Same height as |+⟩, but turn φ half way round (φ = π).",
+        hint_ar: "الارتفاع نفسه كما في |+⟩ لكن أدِر φ نصف دورة (φ = π).",
+        spec: { target: { theta: Math.PI / 2, phi: Math.PI }, tolerance: 0.15 },
+      },
+    ],
     content: [
       {
         id: "q1-1",
@@ -129,7 +214,9 @@ After the measurement, the qubit stays in the answer you got. The original blend
 
 The points |+⟩ and |−⟩ on the equator are both 50/50, but they sit on opposite sides. They differ in something called phase (the sign between the two parts). Phase doesn't change what you measure right away, but it matters a lot once gates are applied.
 
-Try it: open the Bloch Sphere lab (unsync from the teacher first if you are following along). Press the presets |0⟩, |1⟩, |+⟩ and |−⟩ and watch the P(|0⟩) bar. Then move the θ slider: the probabilities change. Move the φ slider: the arrow spins around, but the probabilities stay the same!`,
+Try it: open the Bloch Sphere lab (unsync from the teacher first if you are following along). Press the presets |0⟩, |1⟩, |+⟩ and |−⟩ and watch the P(|0⟩) bar. Then move the θ slider: the probabilities change. Move the φ slider: the arrow spins around, but the probabilities stay the same!
+
+Ready to practise? Open the Practice tab at the top of the lesson.`,
         body_ar: `تعرض كرة بلوخ حالة كيوبت واحد على شكل سهم يبدأ من مركز كرة.
 
 • القطب الشمالي = |0⟩ (يعطي 0 دائماً)
@@ -139,7 +226,9 @@ Try it: open the Bloch Sphere lab (unsync from the teacher first if you are foll
 
 النقطتان |+⟩ و|−⟩ على خط الاستواء كلتاهما 50/50 لكنهما على جانبين متقابلين. يختلفان في شيء اسمه الطور (الإشارة بين الجزأين). الطور لا يغيّر ما تقيسه مباشرة، لكنه مهم جداً عند تطبيق البوابات لاحقاً.
 
-جرّب بنفسك: افتح مختبر كرة بلوخ (ألغِ المزامنة مع المعلم أولاً إن كنت تتابع معه). اضغط الحالات الجاهزة |0⟩ و|1⟩ و|+⟩ و|−⟩ وراقب شريط P(|0⟩). ثم حرّك شريط θ: تتغير الاحتمالات. وحرّك شريط φ: يدور السهم لكن الاحتمالات لا تتغير!`,
+جرّب بنفسك: افتح مختبر كرة بلوخ (ألغِ المزامنة مع المعلم أولاً إن كنت تتابع معه). اضغط الحالات الجاهزة |0⟩ و|1⟩ و|+⟩ و|−⟩ وراقب شريط P(|0⟩). ثم حرّك شريط θ: تتغير الاحتمالات. وحرّك شريط φ: يدور السهم لكن الاحتمالات لا تتغير!
+
+جاهز للتدرّب؟ افتح تبويب التدريب في أعلى الدرس.`,
         visualHint: "bloch",
         blochState: { theta: Math.PI / 2, phi: 0 },
       },
@@ -252,6 +341,53 @@ Try it: open the Bloch Sphere lab (unsync from the teacher first if you are foll
     difficulty: "Beginner",
     estimatedMinutes: 25,
     dayIndex: 2,
+    practice: [
+      {
+        id: "superposition-1",
+        kind: "circuit",
+        prompt: "Build a circuit that always measures 1 (the quantum NOT).",
+        prompt_ar: "ابنِ دائرة تعطي 1 دائماً (NOT الكمومية).",
+        hint: "One X gate is enough.",
+        hint_ar: "بوابة X واحدة تكفي.",
+        numSteps: 6,
+        palette: ["X", "H", "Z"],
+        spec: { numQubits: 1, expect: { "1": 1 }, requireGates: ["X"] },
+      },
+      {
+        id: "superposition-2",
+        kind: "circuit",
+        prompt: "Build a circuit that gives 0 or 1 with a 50/50 chance.",
+        prompt_ar: "ابنِ دائرة تعطي 0 أو 1 باحتمال 50/50.",
+        hint: "Use the Hadamard (H) gate.",
+        hint_ar: "استخدم بوابة هادامار (H).",
+        numSteps: 6,
+        palette: ["X", "H", "Z"],
+        spec: { numQubits: 1, expect: { "0": 0.5, "1": 0.5 }, requireGates: ["H"] },
+      },
+      {
+        id: "superposition-3",
+        kind: "circuit",
+        prompt: "Use two H gates so the result is always 0 again (interference!).",
+        prompt_ar: "استخدم بوابتي H بحيث تكون النتيجة 0 دائماً مرة أخرى (تداخل!).",
+        hint: "Put one H right after the other on the same wire.",
+        hint_ar: "ضع بوابة H مباشرة بعد الأخرى على السلك نفسه.",
+        numSteps: 6,
+        palette: ["X", "H", "Z"],
+        spec: { numQubits: 1, expect: { "0": 1 }, requireGates: ["H", "H"] },
+      },
+      {
+        id: "superposition-4",
+        kind: "circuit",
+        prompt: "Use H, then Z, then H so the result is always 1, just like an X gate.",
+        prompt_ar: "استخدم H ثم Z ثم H بحيث تكون النتيجة 1 دائماً، تماماً كبوابة X.",
+        hint: "Place the three gates in order, one per column: H, Z, H.",
+        hint_ar: "ضع البوابات الثلاث بالترتيب، واحدة في كل عمود: H ثم Z ثم H.",
+        challenge: true,
+        numSteps: 6,
+        palette: ["X", "H", "Z"],
+        spec: { numQubits: 1, expect: { "1": 1 }, requireGates: ["H", "H", "Z"] },
+      },
+    ],
     content: [
       {
         id: "sup-1",
@@ -342,6 +478,11 @@ Try it: in the Circuit Lab place two H gates in a row on q[0] and compare with a
 
 جرّب بنفسك: في مختبر الدوائر ضع بوابتي H متتاليتين على q[0] وقارن مع بوابة H واحدة.`,
         visualHint: "circuit",
+        circuit: {
+          numQubits: 1,
+          numSteps: 4,
+          gates: [previewGate("p-hh-1", "H", 0, 0), previewGate("p-hh-2", "H", 0, 1)],
+        },
       },
       {
         id: "sup-4",
@@ -355,7 +496,9 @@ Try it: in the Circuit Lab place two H gates in a row on q[0] and compare with a
 
 This is why simulating many qubits on a normal computer gets very hard, very quickly.
 
-But there is a catch: when you measure n qubits you only get n ordinary bits, one result. A quantum computer does not "try every answer at once and hand you the best one". Useful quantum algorithms need clever circuits that use interference so the right answer becomes likely.`,
+But there is a catch: when you measure n qubits you only get n ordinary bits, one result. A quantum computer does not "try every answer at once and hand you the best one". Useful quantum algorithms need clever circuits that use interference so the right answer becomes likely.
+
+Ready to practise? Open the Practice tab at the top of the lesson.`,
         body_ar: `كيوبت واحد يحتاج إلى سعتين (واحدة لـ 0 وواحدة لـ 1). وكيوبتان يحتاجان إلى 4 (00 و01 و10 و11). وبوجه عام يحتاج n من الكيوبتات إلى 2ⁿ من السعات:
 
 • كيوبتان ← 4 سعات
@@ -364,7 +507,9 @@ But there is a catch: when you measure n qubits you only get n ordinary bits, on
 
 لهذا تصبح محاكاة كيوبتات كثيرة على حاسوب عادي صعبة جداً وبسرعة كبيرة.
 
-لكن هناك محاذير: عندما تقيس n من الكيوبتات فإنك تحصل على n من البتات العادية فقط، أي نتيجة واحدة. والحاسوب الكمومي لا "يجرّب كل الإجابات دفعة واحدة ويعطيك أفضلها". الخوارزميات الكمومية المفيدة تحتاج إلى دوائر ذكية تستخدم التداخل لتصبح الإجابة الصحيحة هي المحتملة.`,
+لكن هناك محاذير: عندما تقيس n من الكيوبتات فإنك تحصل على n من البتات العادية فقط، أي نتيجة واحدة. والحاسوب الكمومي لا "يجرّب كل الإجابات دفعة واحدة ويعطيك أفضلها". الخوارزميات الكمومية المفيدة تحتاج إلى دوائر ذكية تستخدم التداخل لتصبح الإجابة الصحيحة هي المحتملة.
+
+جاهز للتدرّب؟ افتح تبويب التدريب في أعلى الدرس.`,
         visualHint: "none",
       },
     ],
@@ -466,6 +611,31 @@ But there is a catch: when you measure n qubits you only get n ordinary bits, on
     difficulty: "Intermediate",
     estimatedMinutes: 25,
     dayIndex: 3,
+    practice: [
+      {
+        id: "entanglement-1",
+        kind: "circuit",
+        prompt: "Build a Bell pair: the two qubits must always give 00 or 11, 50/50.",
+        prompt_ar: "ابنِ زوج بيل: يجب أن يعطي الكيوبتان 00 أو 11 دائماً بنسبة 50/50.",
+        hint: "H on q[0] first, then a CNOT with q[0] as the control and q[1] as the target.",
+        hint_ar: "أولاً H على q[0] ثم CNOT يكون q[0] فيها المتحكِّم وq[1] الهدف.",
+        numSteps: 6,
+        palette: ["H", "X", "CNOT"],
+        spec: { numQubits: 2, expect: { "00": 0.5, "11": 0.5 }, requireGates: ["H", "CNOT"] },
+      },
+      {
+        id: "entanglement-2",
+        kind: "circuit",
+        prompt: "Now make the pair give 01 or 10 instead (still 50/50).",
+        prompt_ar: "الآن اجعل الزوج يعطي 01 أو 10 بدلاً من ذلك (وما زالت النسبة 50/50).",
+        hint: "Build the Bell pair, then flip one of the two qubits with an X gate.",
+        hint_ar: "ابنِ زوج بيل ثم اقلب أحد الكيوبتين ببوابة X.",
+        challenge: true,
+        numSteps: 6,
+        palette: ["H", "X", "CNOT"],
+        spec: { numQubits: 2, expect: { "01": 0.5, "10": 0.5 }, requireGates: ["H", "CNOT"] },
+      },
+    ],
     content: [
       {
         id: "ent-1",
@@ -528,6 +698,11 @@ Try it: open the Circuit Lab and click the "Bell State" example. You will see H 
 
 (هناك ثلاث حالات بيل أخرى تختلف بإشارة أو بقلب. يمكنك اكتشافها لاحقاً.)`,
         visualHint: "circuit",
+        circuit: {
+          numQubits: 2,
+          numSteps: 4,
+          gates: [previewGate("p-bell-h", "H", 0, 0), previewGate("p-bell-cx", "CNOT", 0, 1, 1)],
+        },
       },
       {
         id: "ent-3",
@@ -540,7 +715,9 @@ What it can do:
 • Secure keys: entanglement can be used to share secret keys that an eavesdropper can't copy (next lesson).
 • Quantum computing: entanglement is an essential ingredient in many quantum algorithms.
 
-Warning: entanglement is fragile. Noise from the environment (decoherence) can destroy it, so keeping qubits entangled over long times and distances is a big engineering challenge.`,
+Warning: entanglement is fragile. Noise from the environment (decoherence) can destroy it, so keeping qubits entangled over long times and distances is a big engineering challenge.
+
+Ready to practise? Open the Practice tab at the top of the lesson and build your own Bell pair.`,
         body_ar: `ما لا يمكنه فعله: إرسال رسائل أسرع من الضوء. نتائج أليس تبدو عشوائية تماماً وحدها، وكذلك نتائج بوب. لا يظهر الرابط إلا عندما يقارنان قائمتيهما، والمقارنة تحتاج إلى رسالة عادية (هاتف، إنترنت)، وهي أبطأ من الضوء.
 
 ما يمكنه فعله:
@@ -1040,6 +1217,20 @@ Because of noise, today's experiments are limited to very small molecules such a
     difficulty: "Intermediate",
     estimatedMinutes: 25,
     dayIndex: 6,
+    practice: [
+      {
+        id: "algorithms-1",
+        kind: "circuit",
+        prompt: "Challenge: use Grover's recipe on 2 qubits so the answer is always 11.",
+        prompt_ar: "تحدٍّ: استخدم وصفة غروفر على كيوبتين بحيث تكون الإجابة 11 دائماً.",
+        hint: "Open the Circuit Lab, load Examples → Grover (finds 11) and copy its pattern: H on both, a phase-flip on 11 (H · CNOT · H on the second qubit), then the amplify step (H, X, phase-flip, X, H).",
+        hint_ar: "افتح مختبر الدوائر وحمّل الأمثلة ← غروفر (يجد 11) وانسخ نمطها: H على الكيوبتين، ثم قلب إشارة 11 (H · CNOT · H على الكيوبت الثاني)، ثم خطوة التضخيم (H وX وقلب الإشارة وX وH).",
+        challenge: true,
+        numSteps: 12,
+        palette: ["H", "X", "CNOT"],
+        spec: { numQubits: 2, expect: { "11": 1 }, requireGates: ["H", "CNOT"], tolerance: 0.05 },
+      },
+    ],
     isFinalDay: true,
     content: [
       {
@@ -1057,7 +1248,9 @@ Quantum computers are not faster at everything. The size of the speedup depends 
 • For some, such as searching, the speedup is moderate (Grover's algorithm).
 • For a few, such as factoring, the speedup is dramatic (Shor's algorithm).
 
-Finding out which problems benefit is an active area of research.`,
+Finding out which problems benefit is an active area of research.
+
+Below is a real example: Grover's search on 2 qubits (it finds the answer 11 every time). You can load it in the Circuit Lab from the Examples list.`,
         body_ar: `تتبع الخوارزمية الكمومية نمطاً تعرفه من الدروس السابقة:
 
 1. ابدأ الكيوبتات من حالة بسيطة واستخدم بوابات مثل H لإنشاء تراكب.
@@ -1069,8 +1262,15 @@ Finding out which problems benefit is an active area of research.`,
 • في بعضها، كالبحث، يكون التسريع متوسطاً (خوارزمية غروفر).
 • وفي قلة منها، كتحليل الأعداد، يكون التسريع كبيراً جداً (خوارزمية شور).
 
-ومعرفة أي المسائل تستفيد من ذلك مجال بحث نشط.`,
+ومعرفة أي المسائل تستفيد من ذلك مجال بحث نشط.
+
+في الأسفل مثال حقيقي: بحث غروفر على كيوبتين (يجد الإجابة 11 في كل مرة). يمكنك تحميله في مختبر الدوائر من قائمة الأمثلة.`,
         visualHint: "circuit",
+        circuit: {
+          numQubits: 2,
+          numSteps: 11,
+          gates: (EXAMPLE_CIRCUITS.find((c) => c.id === "grover")?.gates ?? []).map((g) => ({ ...g, id: `p-${g.id}` })),
+        },
       },
       {
         id: "alg-2",
